@@ -13,6 +13,7 @@
 #include <array>
 #include <sstream>
 #include <string>
+#include <fstream>
 
 #include "Utility.h"
 #include "DataCollector.h"
@@ -56,21 +57,46 @@ int main(int argc, char** argv)
 		// Hub::run() to send events to all registered device listeners.
 		hub.addListener(&collector);
 
+		//EmgCsvHandler testCSV("test.csv");
+		//testCSV.createFile();
+		//testCSV.addSampleDataLine("100,100,100");
+			
 		// Finally we enter our main loop.
-		while (1) {
+
+		// Variable
+		int isRecording = 0;
+
+		// Action menu
+		std::cout << "Choose an action" << std::endl;
+		std::cout << "1) Record new gesture" << std::endl;
+		std::cout << "2) Try gestures" << std::endl;
+		std::cin >> isRecording;
+
+		// if recording new gesture
+		if (isRecording == 1){
+			std::string nameOfGesture;
+			std::cout << "Type the name of the new gesture: ";
+			std::cin >> nameOfGesture;
+
+			collector.createNewGestureOn(true);
+		}
+
+
+
+		while (isProgramRunning) {
 			// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
 			// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
-			hub.run(1000 / 10);
+			hub.run(1000 / 5);
 			// After processing events, we call the print() member function we defined above to print out the values we've
 			// obtained from any events that have occurred.
-			ClearScreen();
+			/*ClearScreen();
 
 			//collector.print();
 			collector.printStatus();
 			collector.printEMG();
 			collector.printAccelerometer();
 			collector.printGyro();
-			collector.printOrientation();
+			collector.printOrientation();*/
 		}
 
 		// If a standard exception occurred, we print out its message and exit.
@@ -81,4 +107,7 @@ int main(int argc, char** argv)
 		std::cin.ignore();
 		return 1;
 	}
+
+	system("PAUSE");
+	return 0;
 }

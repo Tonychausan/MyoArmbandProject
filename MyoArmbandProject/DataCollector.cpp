@@ -3,6 +3,7 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
 // Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #define _USE_MATH_DEFINES
+#define GESTURE_DATA_SIZE 400
 
 #include <cmath>
 #include <iostream>
@@ -21,7 +22,7 @@
 #include <myo/myo.hpp>
 
 DataCollector::DataCollector()
-		: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples()
+	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples(), isCreatingNewGesture(false), newGestureDataCounter(0)
 	{
 	}
 
@@ -75,6 +76,15 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 {
 	for (int i = 0; i < 8; i++) {
 		emgSamples[i] = emg[i];
+	}
+
+	if (isCreatingNewGesture && newGestureDataCounter < GESTURE_DATA_SIZE){
+		// Create file for measurments
+		newGestureDataCounter++;
+		if (newGestureDataCounter > GESTURE_DATA_SIZE){
+			isProgramRunning = false;
+		}
+		std::cout << newGestureDataCounter << std::endl;
 	}
 }
 
@@ -232,4 +242,8 @@ void DataCollector::printAccelerometer()
 	std::cout << "Accelerometer:\t";
 	printVector3(accelerometerData);
 	std::cout << std::flush;
+}
+
+void DataCollector::createNewGestureOn(bool b, std::string){
+	isCreatingNewGesture = b;
 }
