@@ -21,6 +21,9 @@
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
 
+#include <ANN/ANN.h> // Approximate Nearest Neighbors
+#include <json/json.h>
+
 
 
 int main(int argc, char** argv)
@@ -64,39 +67,63 @@ int main(int argc, char** argv)
 		// Finally we enter our main loop.
 
 		// Variable
-		int isRecording = 0;
+		//int isRecording = 0;
 
-		// Action menu
+		/*/ Action menu
 		std::cout << "Choose an action" << std::endl;
 		std::cout << "1) Record new gesture" << std::endl;
 		std::cout << "2) Try gestures" << std::endl;
-		std::cin >> isRecording;
+		std::cin >> isRecording;*/
 
-		// if recording new gesture
+		/*// if recording new gesture
 		if (isRecording == 1){
 			std::string nameOfGesture;
 			std::cout << "Type the name of the new gesture: ";
 			std::cin >> nameOfGesture;
 
-			collector.createNewGestureOn(true);
-		}
+			collector.createNewGestureOn(true, nameOfGesture);
+		}*/
+
+		//std::ifstream ifs("data/test.json");
+		DataHandler test("compressed-eat01.json"); 
+		test.generateDataArrays();
+		test.printEmg();
+
+		//compressJsonFile("eat01.json");
+
+		std::cout << "hello world" << std::endl;
 
 
+		
 
+
+		//double eateat = crossCorrelation(200, eat1[2], help1[2]);
+		//double eathelp = crossCorrelation(200, test.getEmgArrays()[0], test3.getEmgArrays()[0]);
+
+		//std::cout << eateat << std::endl;
+		//std::cout << eathelp << std::endl;
+
+		//test.printEmg();
+
+		system("PAUSE");
+
+		isProgramRunning = false;
 		while (isProgramRunning) {
 			// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
 			// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
 			hub.run(1000 / 5);
 			// After processing events, we call the print() member function we defined above to print out the values we've
 			// obtained from any events that have occurred.
-			/*ClearScreen();
+			clearScreen();
 
 			//collector.print();
 			collector.printStatus();
 			collector.printEMG();
 			collector.printAccelerometer();
 			collector.printGyro();
-			collector.printOrientation();*/
+			collector.printOrientation();
+
+			std::cout << counter / difftime(time(0), start) << std::endl;
 		}
 
 		// If a standard exception occurred, we print out its message and exit.
