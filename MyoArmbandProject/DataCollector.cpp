@@ -61,24 +61,27 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const m
 	roll_w = static_cast<int>((roll + (float)M_PI) / (M_PI * 2.0f) * 18);
 	pitch_w = static_cast<int>((pitch + (float)M_PI / 2.0f) / M_PI * 18);
 	yaw_w = static_cast<int>((yaw + (float)M_PI) / (M_PI * 2.0f) * 18);
+
+
 }
 
 void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, const myo::Vector3<float> &accel){
 	accelerometerData = accel;
+
 }
 
 void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3< float > & gyro)
 {
+	
 	gyroData = gyro;
 }
 
 // onEmgData() is called whenever a paired Myo has provided new EMG data, and EMG streaming is enabled.
 void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
-	if(counter == 0)
-		start = time(0);
-
-	counter++;
+	
+	
+	
 	for (int i = 0; i < 8; i++) {
 		emgSamples[i] = emg[i];
 	}
@@ -91,6 +94,16 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 		}
 		std::cout << newGestureDataCounter << std::endl;
 	}
+
+
+	clock_t begin = NULL;
+	if (counter == 0)
+		begin = clock();
+
+	counter++;
+	clock_t end = clock();
+	double sec = double(end - begin) / CLOCKS_PER_SEC;
+	std::cout << counter << "/" << sec << " = " << int(counter / sec) << std::endl;
 }
 
 // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,

@@ -86,26 +86,23 @@ int main(int argc, char** argv)
 
 		//std::ifstream ifs("data/test.json");
 		DataHandler test("compressed-eat01.json"); 
-		test.generateDataArrays();
-		test.printEmg();
-
-		//compressJsonFile("eat01.json");
+		DataHandler test2("compressed-eat02.json");
+		DataHandler test3("compressed-help01.json");
+		DataHandler test4("compressed-help02.json");
 
 		std::cout << "hello world" << std::endl;
 
+		double** eat1 = test.getAccArrays();
+		double** eat2 = test2.getAccArrays();
+		double** help1 = test3.getAccArrays();
 
-		
+		double eateat = crossCorrelation(50, eat2[2], eat1[2], DATA_ACC_LENGTH);
+		double eathelp = crossCorrelation(50, eat2[2], help1[2], DATA_ACC_LENGTH);
 
-
-		//double eateat = crossCorrelation(200, eat1[2], help1[2]);
-		//double eathelp = crossCorrelation(200, test.getEmgArrays()[0], test3.getEmgArrays()[0]);
-
-		//std::cout << eateat << std::endl;
-		//std::cout << eathelp << std::endl;
+		std::cout << eateat << std::endl;
+		std::cout << eathelp << std::endl;
 
 		//test.printEmg();
-
-		system("PAUSE");
 
 		isProgramRunning = false;
 		while (isProgramRunning) {
@@ -123,7 +120,7 @@ int main(int argc, char** argv)
 			collector.printGyro();
 			collector.printOrientation();
 
-			std::cout << counter / difftime(time(0), start) << std::endl;
+			std::cout << counter << std::endl;
 		}
 
 		// If a standard exception occurred, we print out its message and exit.
