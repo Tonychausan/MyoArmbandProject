@@ -52,12 +52,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\myo-sdk-win-0.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\ann_1.1.2;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\JsonCpp\dist;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\myo-sdk-win-0.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\myo-sdk-win-0.9.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\ann_1.1.2;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\JsonCpp\src\lib_json;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\myo-sdk-win-0.9.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>myo32.lib;myo64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -88,6 +88,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\JsonCpp\dist\jsoncpp.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="MyoArmbandProject.cpp" />
     <ClCompile Include="DataCollector.cpp" />
     <ClCompile Include="Utility.cpp" />

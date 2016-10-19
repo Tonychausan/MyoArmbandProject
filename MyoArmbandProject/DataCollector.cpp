@@ -14,6 +14,7 @@
 #include <array>
 #include <sstream>
 #include <string>
+#include <time.h>
 
 #include "Utility.h"
 #include "DataCollector.h"
@@ -74,6 +75,10 @@ void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo
 // onEmgData() is called whenever a paired Myo has provided new EMG data, and EMG streaming is enabled.
 void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
+	if(counter == 0)
+		start = time(0);
+
+	counter++;
 	for (int i = 0; i < 8; i++) {
 		emgSamples[i] = emg[i];
 	}

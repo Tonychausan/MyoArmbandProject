@@ -4,11 +4,11 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+#include <json/json.h>
 
 #include "Utility.h"
 
-
-void ClearScreen()
+void clearScreen()
 {
 	HANDLE                     hStdOut;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -43,6 +43,105 @@ void ClearScreen()
 
 	/* Move the cursor home */
 	SetConsoleCursorPosition(hStdOut, homeCoords);
+}
+
+double crossCorrelation(int maxdelay, double* x, double* y){
+	int i, j;
+	double mx, my, sx, sy, sxy, denom, r;
+	int n = DATA_ARRAY_LENGTH;
+	/* Calculate the mean of the two series x[], y[] */
+	mx = 0;
+	my = 0;
+	for (i=0; i<n; i++) {
+		mx += x[i];
+		my += y[i];
+	}
+	mx /= n;
+	my /= n;
+
+	/* Calculate the denominator */
+	sx = 0;
+	sy = 0;
+	for (i = 0; i<n; i++) {
+		sx += (x[i] - mx) * (x[i] - mx);
+		sy += (y[i] - my) * (y[i] - my);
+	}
+	denom = sqrt(sx*sy);
+
+	/* Calculate the correlation series */
+	r = 0.0;
+	for (int delay = -maxdelay; delay < maxdelay; delay++) {
+		sxy = 0;
+		for (i = 0; i<n; i++) {
+			j = i + delay;
+			if (j < 0 || j >= n)
+				continue;
+			else
+				sxy += (x[i] - mx) * (y[j] - my);
+			/* Or should it be (?)
+			if (j < 0 || j >= n)
+			sxy += (x[i] - mx) * (-my);
+			else
+			sxy += (x[i] - mx) * (y[j] - my);
+			*/
+		}
+		
+		if (abs(r) < abs(sxy/denom)){
+			r = sxy / denom;
+		}
+
+		/* r is the correlation coefficient at "delay" */
+
+	}
+	return r;
+}
+
+Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArrays){
+	
+
+	const Json::Value& dataType = obj[dataname];
+	const Json::Value& data = dataType["data"];
+
+	Json::Value dataVec(Json::arrayValue);
+	for (int j = 0; j < DATA_ARRAY_LENGTH; j++)
+	{
+		Json::Value tempArray(Json::arrayValue);
+		for (int i = 0; i < numberOfArrays; i++)
+		{
+			tempArray.append(Json::Value(data[j][i]));
+		}
+		dataVec.append(Json::Value(tempArray));
+	}
+	return dataVec;
+}
+
+void compressJsonFile(std::string name){
+	std::string inFilename  = "data/";
+	inFilename.append(name);
+
+	std::ifstream ifs(inFilename);
+	Json::Reader reader;
+	Json::Value obj;
+	reader.parse(ifs, obj);
+
+	Json::Value event;
+
+	event["emg"]["data"]= jsonDataArray("emg", obj, NUMBER_OF_EMG_ARRAYS);
+	event["acc"]["data"] = jsonDataArray("acc", obj, NUMBER_OF_ACC_ARRAYS);
+	event["gyr"]["data"] = jsonDataArray("gyr", obj, NUMBER_OF_GYR_ARRAYS);
+	event["ori"]["data"] = jsonDataArray("ori", obj, NUMBER_OF_ORI_ARRAYS);
+
+	std::ofstream file_id;
+	std::string outFilename = "data/";
+	outFilename.append("compressed-");
+	outFilename.append(name);
+	std::cout << outFilename << std::endl;
+	file_id.open(outFilename);
+
+	Json::StyledWriter styledWriter;
+	file_id << styledWriter.write(event);
+
+	file_id.close();
 }
 
 CsvHandler::CsvHandler(std::string name)
@@ -95,4 +194,104 @@ void EmgCsvHandler::addEmgSampleDataLine(std::array<int8_t, 8> emgData)
 	}
 	addLine.append("\n");
 	addSampleDataLine(addLine);
+}
+
+DataHandler::DataHandler(std::string name){
+	filename = "data/";
+	filename.append(name);
+}
+
+
+
+void DataHandler::printEmg(){
+	std::ifstream ifs(filename);
+	Json::Reader reader;
+	Json::Value obj;
+	reader.parse(ifs, obj);
+	const Json::Value& emg = obj["emg"];
+	const Json::Value& data = emg["data"];
+
+	for (int i = 0; i < DATA_ARRAY_LENGTH; i++){
+		for (int j = 0; j < NUMBER_OF_EMG_ARRAYS - 1; j++){
+			std::cout << data[i][j] << ",";
+		}
+		std::cout << data[i][7] << std::endl;
+	}
+
+	system("PAUSE");
+
+}
+
+void DataHandler::generateDataArrays(){
+	std::ifstream ifs(filename);
+	Json::Reader reader;
+	Json::Value obj;
+	reader.parse(ifs, obj);
+	const Json::Value& emg = obj["emg"];
+	const Json::Value& data = emg["data"];
+
+	double **emgArrays = new double*[NUMBER_OF_EMG_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++)
+	{
+		emgArrays[i] = new double[DATA_ARRAY_LENGTH];
+		for (int j = 0; j < DATA_ARRAY_LENGTH; j++)
+		{
+			emgArrays[i][j] = data[j][i].asDouble();
+		}
+	}
+
+	// Generate Accelerometer Arrays
+	const Json::Value& acc = obj["acc"];
+	const Json::Value& accData = acc["data"];
+	double **accArrays = new double*[NUMBER_OF_ACC_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_ACC_ARRAYS; i++)
+	{
+		accArrays[i] = new double[DATA_ARRAY_LENGTH];
+		for (int j = 0; j < DATA_ARRAY_LENGTH; j++)
+		{
+			accArrays[i][j] = accData[j][i].asDouble();
+		}
+	}
+
+	// Generate Gyroscope Arrays
+	const Json::Value& gyr = obj["gyr"];
+	const Json::Value& gyrData = gyr["data"];
+	double **gyrArrays = new double*[NUMBER_OF_GYR_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_GYR_ARRAYS; i++)
+	{
+		gyrArrays[i] = new double[DATA_ARRAY_LENGTH];
+		for (int j = 0; j < DATA_ARRAY_LENGTH; j++)
+		{
+			gyrArrays[i][j] = gyrData[j][i].asDouble();
+		}
+	}
+
+	// Generate Orientation Arrays
+	const Json::Value& ori = obj["ori"];
+	const Json::Value& oriData = emg["data"];
+	double **oriArrays = new double*[NUMBER_OF_ORI_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_ORI_ARRAYS; i++)
+	{
+		oriArrays[i] = new double[DATA_ARRAY_LENGTH];
+		for (int j = 0; j < DATA_ARRAY_LENGTH; j++)
+		{
+			oriArrays[i][j] = oriData[j][i].asDouble();
+		}
+	}
+}
+
+double** DataHandler::getEmgArrays(){
+	return emgArrays;
+}
+double** DataHandler::getGyrArrays()
+{
+	return gyroArrays;
+}
+double** DataHandler::getAccArrays()
+{
+	return accArrays;
+}
+double** DataHandler::getOriArrays()
+{
+	return oriArrays;
 }
