@@ -10,8 +10,11 @@ static bool isProgramRunning = true;
 static int counter = 20; //frequency counter
 static time_t start;
 
-static const int DATA_ARRAY_LENGTH= 400;
+enum Gesture{ EAT, HELP, NONE };
+static const int NUMBER_OF_GESTURES = 2;
 
+enum Sensor{ EMG, ACC, ORI, GYR };
+static const int NUMBER_OF_SENSORS = 4;
 
 static const int DATA_TIME_INTERVAL = 2;
 static const int DATA_EMG_LENGTH = 200 * DATA_TIME_INTERVAL;
@@ -24,6 +27,16 @@ static const int NUMBER_OF_ACC_ARRAYS = 3;
 static const int NUMBER_OF_GYR_ARRAYS = 3;
 static const int NUMBER_OF_ORI_ARRAYS = 4;
 
+static std::string testFileList[] = {
+		"eat01.json",
+		"eat02.json",
+		"eat03.json",
+		"help01.json",
+		"help02.json",
+		"help03.json"
+	};
+static const int NUMBER_OF_TEST_PER_GESTURE = 3;
+static const int testFileListSize = NUMBER_OF_GESTURES * NUMBER_OF_TEST_PER_GESTURE;
 
 void clearScreen();
 double crossCorrelation(int, double*, double*, int);
@@ -31,29 +44,9 @@ double crossCorrelation(int, double*, double*, int);
 void compressAllJsonFiles();
 void compressJsonFile(std::string);
 
-class CsvHandler{
-private:
-	std::string filename;
-public:
-	CsvHandler(std::string);
+std::string gestureToString(Gesture);
 
-	void addSampleDataLine(std::string);
-
-	void createFile();
-	void removeFile();
-
-	void setFilename(std::string);
-};
-
-
-class EmgCsvHandler : public CsvHandler{
-private:
-	const std::string foldername = "emg/";
-public:
-	EmgCsvHandler(std::string);
-
-	void addEmgSampleDataLine(std::array<int8_t, 8>);
-};
+Gesture gestureComparisons(std::string);
 
 class DataHandler{
 private:
@@ -71,7 +64,10 @@ public:
 	double** getGyrArrays();
 	double** getAccArrays();
 	double** getOriArrays();
-	void printEmg();
+
+	double** getArrays(Sensor);
 };
+
+
 
 #endif

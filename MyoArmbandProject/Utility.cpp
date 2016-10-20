@@ -45,6 +45,7 @@ void clearScreen()
 	SetConsoleCursorPosition(hStdOut, homeCoords);
 }
 
+// http://paulbourke.net/miscellaneous/correlate/
 double crossCorrelation(int maxdelay, double* x, double* y, int n){
 	int i, j;
 	double mx, my, sx, sy, sxy, denom, r;
@@ -92,12 +93,10 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 		/* r is the correlation coefficient at "delay" */
 
 	}
-	return r;
+	return abs(r);
 }
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArrays, int numberOfData){
-	
-
 	const Json::Value& dataType = obj[dataname];
 	const Json::Value& data = dataType["data"];
 
@@ -113,19 +112,12 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArr
 	}
 	return dataVec;
 }
-
 void compressAllJsonFiles(){
-	std::string files[] = {"eat01.json",
-		"eat02.json",
-		"help01.json",
-		"help02.json"
-	};
-
-	for (int i = 0; i < 4; i++){
-		compressJsonFile(files[i]);
+	for (int i = 0; i < testFileListSize; i++){
+		compressJsonFile(testFileList[i]);
 	}
+	std::cout << "Comppression finished!" << std::endl;
 }
-
 void compressJsonFile(std::string name){
 	std::string inFilename  = "data/";
 	inFilename.append(name);
@@ -154,57 +146,104 @@ void compressJsonFile(std::string name){
 
 	file_id.close();
 }
-
-CsvHandler::CsvHandler(std::string name)
-{
-	setFilename(name);
+std::string getCompressedFilename(int i){
+	std::string  name = "compressed-";
+	name.append(testFileList[i]);
+	return name;
 }
 
-void CsvHandler::addSampleDataLine(std::string inputLine)
-{
-	std::ofstream file;
-	file.open(filename, std::ios::app);
+std::string gestureToString(Gesture gesture){
+	switch (gesture){
+	case EAT:
+		return "EAT";
+		break;
+	case HELP:
+		return "HELP";
+		break;
 
-	file << inputLine << std::endl;
-
-	file.close();
-}
-
-void CsvHandler::createFile()
-{
-	std::ofstream file;
-	file.open(filename);
-	file.close();
-}
-
-void CsvHandler::removeFile()
-{
-	std::remove(filename.c_str());
-}
-
-void CsvHandler::setFilename(std::string name)
-{
-	filename = name;
-}
-
-EmgCsvHandler::EmgCsvHandler(std::string name)
-	:CsvHandler(name)
-{
-	std::string tempFoldername = foldername;
-	setFilename(tempFoldername.append(name));
-}
-
-void EmgCsvHandler::addEmgSampleDataLine(std::array<int8_t, 8> emgData)
-{
-	std::string addLine = std::to_string(emgData[0]);
-	for (int i = 1; i < 8; i++) {
-		std::string tempString = std::to_string(emgData[i]);
-
-		addLine.append(",");
-		addLine.append(tempString);
+	default:
+		return "";
+		break;
 	}
-	addLine.append("\n");
-	addSampleDataLine(addLine);
+}
+
+std::string sensorToString(Sensor sensor){
+	switch (sensor){
+	case EMG:
+		return "Emg";
+		break;
+	case ACC:
+		return "Acc";
+		break;
+	case GYR:
+		return "Gyr";
+		break;
+	case ORI:
+		return "Ori";
+		break;
+	}
+}
+
+
+double compareArrays(double** in, double** test, Sensor sensor){
+	int numberOfArrays;
+	int dataLength;
+
+	switch (sensor){
+	case EMG:
+		numberOfArrays = NUMBER_OF_EMG_ARRAYS;
+		dataLength = DATA_EMG_LENGTH;
+		break;
+	case ACC:
+		numberOfArrays = NUMBER_OF_ACC_ARRAYS;
+		dataLength = DATA_ACC_LENGTH;
+		break;
+	case GYR:
+		numberOfArrays = NUMBER_OF_GYR_ARRAYS;
+		dataLength = DATA_GYR_LENGTH;
+		break;
+
+	case ORI:
+		numberOfArrays = NUMBER_OF_ORI_ARRAYS;
+		dataLength = DATA_ORI_LENGTH;
+		break;
+	}
+
+	double r = 0;
+	for (int i = 0; i < numberOfArrays; i++)
+	{
+		r += crossCorrelation(dataLength/2, in[i], test[i], dataLength);
+	}
+	return r / numberOfArrays;
+}
+
+Gesture gestureComparisons(std::string testfile){
+	Gesture prediction = NONE;
+	DataHandler gestureInput(testfile);
+	double r = 0.0;
+
+	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
+	{
+		double temp_r = 0.0;
+		for (int j = 0; j < NUMBER_OF_TEST_PER_GESTURE; j++)
+		{
+			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
+			std::cout << testFilename << std::endl;
+			DataHandler testGesture(testFilename);
+			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
+			{
+				Sensor sensor = static_cast<Sensor>(k);
+				temp_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
+			}
+		}
+		std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << temp_r << std::endl;
+		if (temp_r > r)
+		{
+			r = temp_r;
+			prediction = static_cast<Gesture>(i);
+		}
+	}
+	return prediction;
 }
 
 DataHandler::DataHandler(std::string name){
@@ -212,27 +251,6 @@ DataHandler::DataHandler(std::string name){
 	filename.append(name);
 
 	generateDataArrays();
-}
-
-
-
-void DataHandler::printEmg(){
-	std::ifstream ifs(filename);
-	Json::Reader reader;
-	Json::Value obj;
-	reader.parse(ifs, obj);
-	const Json::Value& emg = obj["emg"];
-	const Json::Value& data = emg["data"];
-
-	for (int i = 0; i < DATA_ARRAY_LENGTH; i++){
-		for (int j = 0; j < NUMBER_OF_EMG_ARRAYS - 1; j++){
-			std::cout << data[i][j] << ",";
-		}
-		std::cout << data[i][7] << std::endl;
-	}
-
-	system("PAUSE");
-
 }
 
 void DataHandler::generateDataArrays(){
@@ -307,4 +325,17 @@ double** DataHandler::getAccArrays()
 double** DataHandler::getOriArrays()
 {
 	return oriArrays;
+}
+
+double** DataHandler::getArrays(Sensor sensor){
+	switch (sensor){
+	case EMG:
+		return emgArrays;
+	case ACC:
+		return gyrArrays;
+	case GYR:
+		return accArrays;
+	case ORI:
+		return oriArrays;
+	}
 }

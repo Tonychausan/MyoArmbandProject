@@ -59,40 +59,37 @@ int main(int argc, char** argv)
 		// Hub::addListener() takes the address of any object whose class inherits from DeviceListener, and will cause
 		// Hub::run() to send events to all registered device listeners.
 		hub.addListener(&collector);
-
-		//EmgCsvHandler testCSV("test.csv");
-		//testCSV.createFile();
-		//testCSV.addSampleDataLine("100,100,100");
 			
 		// Finally we enter our main loop.
 
 		// Variable
-		//int isRecording = 0;
+		int action = 0;
 
-		/*/ Action menu
+		// Action menu
 		std::cout << "Choose an action" << std::endl;
-		std::cout << "1) Record new gesture" << std::endl;
-		std::cout << "2) Try gestures" << std::endl;
-		std::cin >> isRecording;*/
+		std::cout << "1) Try gestures" << std::endl;
+		std::cout << "2) Compress files" << std::endl;
+		std::cin >> action;
 
-		/*// if recording new gesture
-		if (isRecording == 1){
-			std::string nameOfGesture;
-			std::cout << "Type the name of the new gesture: ";
-			std::cin >> nameOfGesture;
+		isProgramRunning = false;
+		if (action == 2){
+			compressAllJsonFiles();
+			compressJsonFile("eattest.json");
+		}
+		else {
+			isProgramRunning = false;
+			std::cout << gestureToString(gestureComparisons("compressed-eattest.json")) << std::endl;
+			std::cout << "hello";
+		}
 
-			collector.createNewGestureOn(true, nameOfGesture);
-		}*/
-
-		//std::ifstream ifs("data/test.json");
-		DataHandler test("compressed-eat01.json"); 
+		/*DataHandler test("compressed-eat01.json"); 
 		DataHandler test2("compressed-eat02.json");
 		DataHandler test3("compressed-help01.json");
 		DataHandler test4("compressed-help02.json");
 
-		std::cout << "hello world" << std::endl;
+		std::cout << "world" << std::endl;
 
-		double** eat1 = test.getAccArrays();
+		/*double** eat1 = test.getAccArrays();
 		double** eat2 = test2.getAccArrays();
 		double** help1 = test3.getAccArrays();
 
@@ -100,11 +97,8 @@ int main(int argc, char** argv)
 		double eathelp = crossCorrelation(50, eat2[2], help1[2], DATA_ACC_LENGTH);
 
 		std::cout << eateat << std::endl;
-		std::cout << eathelp << std::endl;
+		std::cout << eathelp << std::endl;*/
 
-		//test.printEmg();
-
-		isProgramRunning = false;
 		while (isProgramRunning) {
 			// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
 			// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
@@ -119,8 +113,6 @@ int main(int argc, char** argv)
 			collector.printAccelerometer();
 			collector.printGyro();
 			collector.printOrientation();
-
-			std::cout << counter << std::endl;
 		}
 
 		// If a standard exception occurred, we print out its message and exit.
