@@ -3,6 +3,7 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
 // Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #define _USE_MATH_DEFINES
+#define GESTURE_DATA_SIZE 400
 
 #include <cmath>
 #include <iostream>
@@ -22,7 +23,7 @@
 #include <myo/myo.hpp>
 
 DataCollector::DataCollector()
-	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples(), gestureEmgCounter(0), isEmgRecording (0)
+	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples(), gestureCounter(0), isGestureRecording(0)
 	{
 		isGyrRecording = false;
 		isOriRecording = false;
@@ -69,7 +70,7 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const m
 	yaw_w = static_cast<int>((yaw + (float)M_PI) / (M_PI * 2.0f) * 18);
 
 
-	if (isOriRecording && gestureOriCounter < DATA_ORI_LENGTH){
+	if (isOriRecording && gestureOriCounter < DATA_ORI_LENGTH/* + DATA_EMG_LENGTH_MARGIN*/){
 		double* ori = new double[NUMBER_OF_ORI_ARRAYS];
 		ori[0] = quat.x();
 		ori[1] = quat.y();
@@ -79,11 +80,14 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const m
 		for (int i = 0; i < NUMBER_OF_ORI_ARRAYS; i++) {
 			inputGesture.setSensorArray(gestureOriCounter, i, (double) ori[i], ORI);
 		}
-		//std::cout << gestureEmgCounter << std::endl;
+		//std::cout << gestureCounter << std::endl;
 		gestureOriCounter += 1;
 	}
 	else if (isOriRecording){
 		isOriRecording = false;
+	}
+	else if (isGestureRecording){
+		gestureRecordOff();
 	}
 
 }
@@ -92,7 +96,7 @@ void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, con
 	accelerometerData = accel;
 
 
-	if (isAccRecording && gestureAccCounter < DATA_ACC_LENGTH){
+	if (isAccRecording && gestureAccCounter < DATA_ACC_LENGTH/* + DATA_EMG_LENGTH_MARGIN*/){
 		for (int i = 0; i < NUMBER_OF_ACC_ARRAYS; i++) {
 			inputGesture.setSensorArray(gestureAccCounter, i, (double) accel[i], ACC);
 		}
@@ -102,21 +106,27 @@ void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, con
 	else if (isAccRecording){
 		isAccRecording = false;
 	}
+	else if (isGestureRecording){
+		gestureRecordOff();
+	}
 }
 
 void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3< float > & gyro)
 {
 	gyroData = gyro;
 
-	if (isGyrRecording && gestureGyrCounter < DATA_GYR_LENGTH){
+	if (isGyrRecording && gestureGyrCounter < DATA_GYR_LENGTH/* + DATA_EMG_LENGTH_MARGIN*/){
 		for (int i = 0; i < NUMBER_OF_GYR_ARRAYS; i++) {
 			inputGesture.setSensorArray(gestureGyrCounter, i, (double) gyro[i], GYR);
 		}
-		//std::cout << gestureEmgCounter << std::endl;
+		//std::cout << gestureCounter << std::endl;
 		gestureGyrCounter += 1;
 	}
 	else if (isGyrRecording){
 		isGyrRecording = false;
+	}
+	else if (isGestureRecording){
+		gestureRecordOff();
 	}
 }
 
@@ -127,18 +137,14 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 		emgSamples[i] = emg[i];
 	}
 
-	if (isEmgRecording && gestureEmgCounter < DATA_EMG_LENGTH){
+	if (isGestureRecording && gestureCounter < DATA_EMG_LENGTH/* + DATA_EMG_LENGTH_MARGIN*/ ){
 		for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++) {
-			inputGesture.setSensorArray(gestureEmgCounter, i, (int) emg[i], EMG);
+			inputGesture.setSensorArray(gestureCounter, i, (int) emg[i], EMG);
 		}
-		//std::cout << gestureEmgCounter << std::endl;
-		gestureEmgCounter += 1;
+		//std::cout << gestureCounter << std::endl;
+		gestureCounter += 1;
 	}
-	else if (isEmgRecording ){
-		isEmgRecording = false;
-	}
-
-	if (!isEmgRecording && !isAccRecording && !isGyrRecording && !isOriRecording){
+	else if (isGestureRecording){
 		gestureRecordOff();
 	}
 }
@@ -300,12 +306,13 @@ void DataCollector::printAccelerometer()
 }
 
 void DataCollector::gestureRecordOn(){
-	isEmgRecording = true;
+	isGestureRecording = true;
 	isGyrRecording = true;
 	isOriRecording = true;
 	isAccRecording = true;
 
-	gestureEmgCounter = 0;
+
+	gestureCounter = 0;
 	gestureGyrCounter = 0;
 	gestureAccCounter = 0;
 	gestureOriCounter = 0;
@@ -318,11 +325,11 @@ void DataCollector::gestureRecordOff(){
 	std::cout << "gesture recording finished..." << std::endl << std::endl;
 	std::cout << gestureToString(gestureComparisons2(inputGesture)) << std::endl;
 
-	isEmgRecording = false;
+	isGestureRecording = false;
 }
 
 bool DataCollector::isRecording(){
-	return isEmgRecording ;
+	return isGestureRecording;
 }
 
 void DataCollector::setInputGestureAt(int i, int j, double value, Sensor sensor){
