@@ -3,7 +3,6 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
 // Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #define _USE_MATH_DEFINES
-#define GESTURE_DATA_SIZE 400
 
 #include <cmath>
 #include <iostream>
@@ -23,8 +22,15 @@
 #include <myo/myo.hpp>
 
 DataCollector::DataCollector()
-	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples(), isCreatingNewGesture(false), newGestureDataCounter(0)
+	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples(), gestureEmgCounter(0), isEmgRecording (0)
 	{
+		isGyrRecording = false;
+		isOriRecording = false;
+		isAccRecording = false;
+
+		gestureGyrCounter = 0;
+		gestureAccCounter = 0;
+		gestureOriCounter = 0;
 	}
 
 // onUnpair() is called whenever the Myo is disconnected from Myo Connect by the user.
@@ -63,47 +69,78 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const m
 	yaw_w = static_cast<int>((yaw + (float)M_PI) / (M_PI * 2.0f) * 18);
 
 
+	if (isOriRecording && gestureOriCounter < DATA_ORI_LENGTH){
+		double* ori = new double[NUMBER_OF_ORI_ARRAYS];
+		ori[0] = quat.x();
+		ori[1] = quat.y();
+		ori[2] = quat.z();
+		ori[3] = quat.w();
+
+		for (int i = 0; i < NUMBER_OF_ORI_ARRAYS; i++) {
+			inputGesture.setSensorArray(gestureOriCounter, i, (double) ori[i], ORI);
+		}
+		//std::cout << gestureEmgCounter << std::endl;
+		gestureOriCounter += 1;
+	}
+	else if (isOriRecording){
+		isOriRecording = false;
+	}
+
 }
 
 void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, const myo::Vector3<float> &accel){
 	accelerometerData = accel;
 
+
+	if (isAccRecording && gestureAccCounter < DATA_ACC_LENGTH){
+		for (int i = 0; i < NUMBER_OF_ACC_ARRAYS; i++) {
+			inputGesture.setSensorArray(gestureAccCounter, i, (double) accel[i], ACC);
+		}
+		//std::cout << gestureAccCounter << std::endl;
+		gestureAccCounter += 1;
+	}
+	else if (isAccRecording){
+		isAccRecording = false;
+	}
 }
 
 void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3< float > & gyro)
 {
-	
 	gyroData = gyro;
+
+	if (isGyrRecording && gestureGyrCounter < DATA_GYR_LENGTH){
+		for (int i = 0; i < NUMBER_OF_GYR_ARRAYS; i++) {
+			inputGesture.setSensorArray(gestureGyrCounter, i, (double) gyro[i], GYR);
+		}
+		//std::cout << gestureEmgCounter << std::endl;
+		gestureGyrCounter += 1;
+	}
+	else if (isGyrRecording){
+		isGyrRecording = false;
+	}
 }
 
 // onEmgData() is called whenever a paired Myo has provided new EMG data, and EMG streaming is enabled.
 void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
-	
-	
-	
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++) {
 		emgSamples[i] = emg[i];
 	}
 
-	if (isCreatingNewGesture && newGestureDataCounter < GESTURE_DATA_SIZE){
-		// Create file for measurments
-		newGestureDataCounter++;
-		if (newGestureDataCounter > GESTURE_DATA_SIZE){
-			isProgramRunning = false;
+	if (isEmgRecording && gestureEmgCounter < DATA_EMG_LENGTH){
+		for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++) {
+			inputGesture.setSensorArray(gestureEmgCounter, i, (int) emg[i], EMG);
 		}
-		std::cout << newGestureDataCounter << std::endl;
+		//std::cout << gestureEmgCounter << std::endl;
+		gestureEmgCounter += 1;
+	}
+	else if (isEmgRecording ){
+		isEmgRecording = false;
 	}
 
-
-	clock_t begin = NULL;
-	if (counter == 0)
-		begin = clock();
-
-	counter++;
-	clock_t end = clock();
-	double sec = double(end - begin) / CLOCKS_PER_SEC;
-	std::cout << counter << "/" << sec << " = " << int(counter / sec) << std::endl;
+	if (!isEmgRecording && !isAccRecording && !isGyrRecording && !isOriRecording){
+		gestureRecordOff();
+	}
 }
 
 // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
@@ -262,6 +299,34 @@ void DataCollector::printAccelerometer()
 	std::cout << std::flush;
 }
 
-void DataCollector::createNewGestureOn(bool b, std::string){
-	isCreatingNewGesture = b;
+void DataCollector::gestureRecordOn(){
+	isEmgRecording = true;
+	isGyrRecording = true;
+	isOriRecording = true;
+	isAccRecording = true;
+
+	gestureEmgCounter = 0;
+	gestureGyrCounter = 0;
+	gestureAccCounter = 0;
+	gestureOriCounter = 0;
+
+	std::cout << "Recording gesture..." << std::endl;
 }
+
+void DataCollector::gestureRecordOff(){
+
+	std::cout << "gesture recording finished..." << std::endl << std::endl;
+	std::cout << gestureToString(gestureComparisons2(inputGesture)) << std::endl;
+
+	isEmgRecording = false;
+}
+
+bool DataCollector::isRecording(){
+	return isEmgRecording ;
+}
+
+void DataCollector::setInputGestureAt(int i, int j, double value, Sensor sensor){
+	inputGesture.setSensorArray(i,j,value,sensor);
+}
+
+

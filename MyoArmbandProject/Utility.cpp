@@ -47,14 +47,18 @@ void clearScreen()
 
 // http://paulbourke.net/miscellaneous/correlate/
 double crossCorrelation(int maxdelay, double* x, double* y, int n){
+	// first values
+	double xFirst = x[0];
+	double yFirst = y[0];
+
 	int i, j;
 	double mx, my, sx, sy, sxy, denom, r;
 	/* Calculate the mean of the two series x[], y[] */
 	mx = 0;
 	my = 0;
 	for (i=0; i<n; i++) {
-		mx += x[i];
-		my += y[i];
+		mx += x[i] - xFirst;
+		my += y[i] - yFirst;
 	}
 	mx /= n;
 	my /= n;
@@ -63,8 +67,8 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 	sx = 0;
 	sy = 0;
 	for (i = 0; i<n; i++) {
-		sx += (x[i] - mx) * (x[i] - mx);
-		sy += (y[i] - my) * (y[i] - my);
+		sx += (x[i] - xFirst - mx) * (x[i] - xFirst - mx);
+		sy += (y[i] - yFirst - my) * (y[i] - yFirst - my);
 	}
 	denom = sqrt(sx*sy);
 
@@ -77,7 +81,7 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 			if (j < 0 || j >= n)
 				continue;
 			else
-				sxy += (x[i] - mx) * (y[j] - my);
+				sxy += (x[i] - xFirst - mx) * (y[j] - yFirst - my);
 			/* Or should it be (?)
 			if (j < 0 || j >= n)
 			sxy += (x[i] - mx) * (-my);
@@ -184,30 +188,47 @@ std::string sensorToString(Sensor sensor){
 	}
 }
 
+void setDataLengt(int &dataLength, Sensor sensor){
+	switch (sensor){
+	case EMG:
+		dataLength = DATA_EMG_LENGTH;
+		break;
+	case ACC:
+		dataLength = DATA_ACC_LENGTH;
+		break;
+	case GYR:
+		dataLength = DATA_GYR_LENGTH;
+		break;
+	case ORI:
+		dataLength = DATA_ORI_LENGTH;
+		break;
+	}
+};
+
+void setNumberOfArrays(int &numberOfArrays, Sensor sensor){
+	switch (sensor){
+	case EMG:
+		numberOfArrays = NUMBER_OF_EMG_ARRAYS;
+		break;
+	case ACC:
+		numberOfArrays = NUMBER_OF_ACC_ARRAYS;
+		break;
+	case GYR:
+		numberOfArrays = NUMBER_OF_GYR_ARRAYS;
+		break;
+	case ORI:
+		numberOfArrays = NUMBER_OF_ORI_ARRAYS;
+		break;
+	}
+};
+
 
 double compareArrays(double** in, double** test, Sensor sensor){
 	int numberOfArrays;
 	int dataLength;
 
-	switch (sensor){
-	case EMG:
-		numberOfArrays = NUMBER_OF_EMG_ARRAYS;
-		dataLength = DATA_EMG_LENGTH;
-		break;
-	case ACC:
-		numberOfArrays = NUMBER_OF_ACC_ARRAYS;
-		dataLength = DATA_ACC_LENGTH;
-		break;
-	case GYR:
-		numberOfArrays = NUMBER_OF_GYR_ARRAYS;
-		dataLength = DATA_GYR_LENGTH;
-		break;
-
-	case ORI:
-		numberOfArrays = NUMBER_OF_ORI_ARRAYS;
-		dataLength = DATA_ORI_LENGTH;
-		break;
-	}
+	setNumberOfArrays(numberOfArrays, sensor);
+	setDataLengt(dataLength, sensor);
 
 	double r = 0;
 	for (int i = 0; i < numberOfArrays; i++)
@@ -219,7 +240,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 
 Gesture gestureComparisons(std::string testfile){
 	Gesture prediction = NONE;
-	DataHandler gestureInput(testfile);
+	DataFileHandler gestureInput(testfile);
 	double r = 0.0;
 
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
@@ -229,7 +250,7 @@ Gesture gestureComparisons(std::string testfile){
 		{
 			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
 			std::cout << testFilename << std::endl;
-			DataHandler testGesture(testFilename);
+			DataFileHandler testGesture(testFilename);
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
 				Sensor sensor = static_cast<Sensor>(k);
@@ -246,14 +267,48 @@ Gesture gestureComparisons(std::string testfile){
 	return prediction;
 }
 
-DataHandler::DataHandler(std::string name){
+Gesture gestureComparisons2(DataInputHandler gestureInput){
+	Gesture prediction = NONE;
+	double r = 0.0;
+
+	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
+	{
+		double temp_r = 0.0;
+		for (int j = 0; j < NUMBER_OF_TEST_PER_GESTURE; j++)
+		{
+			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
+			std::cout << testFilename << std::endl;
+			DataFileHandler testGesture(testFilename);
+			for (int k = 0; k < 2; k++)
+			{
+				Sensor sensor = static_cast<Sensor>(k);
+				temp_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
+			}
+		}
+		std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << temp_r << std::endl;
+		if (temp_r > r)
+		{
+			r = temp_r;
+			prediction = static_cast<Gesture>(i);
+		}
+	}
+	return prediction;
+}
+
+DataHandler::DataHandler(){
+
+};
+
+DataFileHandler::DataFileHandler(std::string name)
+	:DataHandler()
+{
 	filename = "data/";
 	filename.append(name);
 
 	generateDataArrays();
 }
 
-void DataHandler::generateDataArrays(){
+void DataFileHandler::generateDataArrays(){
 	std::ifstream ifs(filename);
 	Json::Reader reader;
 	Json::Value obj;
@@ -311,22 +366,6 @@ void DataHandler::generateDataArrays(){
 	}
 }
 
-double** DataHandler::getEmgArrays(){
-	return emgArrays;
-}
-double** DataHandler::getGyrArrays()
-{
-	return gyrArrays;
-}
-double** DataHandler::getAccArrays()
-{
-	return accArrays;
-}
-double** DataHandler::getOriArrays()
-{
-	return oriArrays;
-}
-
 double** DataHandler::getArrays(Sensor sensor){
 	switch (sensor){
 	case EMG:
@@ -338,4 +377,63 @@ double** DataHandler::getArrays(Sensor sensor){
 	case ORI:
 		return oriArrays;
 	}
+}
+
+DataInputHandler::DataInputHandler(){
+	emgArrays = new double*[NUMBER_OF_EMG_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++)
+	{
+		emgArrays[i] = new double[DATA_EMG_LENGTH];
+	}
+
+	accArrays = new double*[NUMBER_OF_ACC_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_ACC_ARRAYS; i++)
+	{
+		accArrays[i] = new double[DATA_ACC_LENGTH];
+	}
+
+	gyrArrays = new double*[NUMBER_OF_GYR_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_GYR_ARRAYS; i++)
+	{
+		gyrArrays[i] = new double[DATA_GYR_LENGTH];
+	}
+
+	oriArrays = new double*[NUMBER_OF_ORI_ARRAYS];
+	for (int i = 0; i < NUMBER_OF_ORI_ARRAYS; i++)
+	{
+		oriArrays[i] = new double[DATA_ORI_LENGTH];
+	}
+}
+
+void DataInputHandler::setSensorArray(int i, int j, double value, Sensor sensor){
+	int numberOfArrays;
+	int dataLength;
+
+	setNumberOfArrays(numberOfArrays, sensor);
+	setDataLengt(dataLength, sensor);
+
+	if (j > numberOfArrays || i > dataLength)
+	{
+		std::cout << sensorToString(sensor) << ": Out of bound in setSensorArray!! ("<< i << "," << j << ")" << std::endl;
+		return;
+	}
+
+	double **workArrays;
+	switch (sensor){
+	case EMG:
+		workArrays = emgArrays;
+		break;
+	case ACC:
+		workArrays = accArrays;
+		break;
+	case GYR:
+		workArrays = gyrArrays;
+		break;
+	default: //ORI
+		workArrays = oriArrays;
+		break;
+
+	}
+
+	workArrays[j][i] = value;
 }

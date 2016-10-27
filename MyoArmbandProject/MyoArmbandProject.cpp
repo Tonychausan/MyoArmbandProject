@@ -14,6 +14,8 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <thread>
+#include <windows.h>
 
 #include "Utility.h"
 #include "DataCollector.h"
@@ -21,8 +23,24 @@
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
 
-#include <ANN/ANN.h> // Approximate Nearest Neighbors
 #include <json/json.h>
+
+volatile bool isRecording = false;
+
+void keyboardInterruptDetector()
+{
+	while (isProgramRunning)
+	{
+		if (!isRecording)
+		{
+			Sleep(5000);
+			//std::cout << "Press enter to try a gesture..." << std::endl;
+			system("pause");
+			isRecording = true;
+		}
+	}
+	
+}
 
 
 
@@ -68,54 +86,44 @@ int main(int argc, char** argv)
 		// Action menu
 		std::cout << "Choose an action" << std::endl;
 		std::cout << "1) Try gestures" << std::endl;
-		std::cout << "2) Compress files" << std::endl;
+		std::cout << "2) Measurment display" << std::endl;
+		std::cout << "3) Compress files" << std::endl;
 		std::cin >> action;
 
 		isProgramRunning = false;
-		if (action == 2){
+		if (action == 3){
 			compressAllJsonFiles();
-			compressJsonFile("eattest.json");
+		}
+		else if (action == 2){
+			isProgramRunning = true;
+			while (isProgramRunning) {
+
+				// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
+				// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
+				hub.run(1000 / 5);
+
+				clearScreen();
+
+				collector.printStatus();
+				collector.printEMG();
+				collector.printAccelerometer();
+				collector.printGyro();
+				collector.printOrientation();
+			}
 		}
 		else {
-			isProgramRunning = false;
-			std::cout << gestureToString(gestureComparisons("compressed-eattest.json")) << std::endl;
-			std::cout << "hello";
+			isProgramRunning = true;
+
+			std::thread keyboardInterrupt(keyboardInterruptDetector);
+			while (isProgramRunning){
+				if (isRecording){
+					collector.gestureRecordOn();
+					isRecording = false;
+				}
+				hub.run(1000 / 5);
+			}
+			keyboardInterrupt.join();
 		}
-
-		/*DataHandler test("compressed-eat01.json"); 
-		DataHandler test2("compressed-eat02.json");
-		DataHandler test3("compressed-help01.json");
-		DataHandler test4("compressed-help02.json");
-
-		std::cout << "world" << std::endl;
-
-		/*double** eat1 = test.getAccArrays();
-		double** eat2 = test2.getAccArrays();
-		double** help1 = test3.getAccArrays();
-
-		double eateat = crossCorrelation(50, eat2[2], eat1[2], DATA_ACC_LENGTH);
-		double eathelp = crossCorrelation(50, eat2[2], help1[2], DATA_ACC_LENGTH);
-
-		std::cout << eateat << std::endl;
-		std::cout << eathelp << std::endl;*/
-
-		while (isProgramRunning) {
-			// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
-			// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
-			hub.run(1000 / 5);
-			// After processing events, we call the print() member function we defined above to print out the values we've
-			// obtained from any events that have occurred.
-			clearScreen();
-
-			//collector.print();
-			collector.printStatus();
-			collector.printEMG();
-			collector.printAccelerometer();
-			collector.printGyro();
-			collector.printOrientation();
-		}
-
-		// If a standard exception occurred, we print out its message and exit.
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;

@@ -5,7 +5,7 @@
 #include <array>
 #include <myo/myo.hpp>
 
-static bool isProgramRunning = true;
+volatile static bool isProgramRunning = true;
 
 static int counter = 20; //frequency counter
 static time_t start;
@@ -17,10 +17,22 @@ enum Sensor{ EMG, ACC, ORI, GYR };
 static const int NUMBER_OF_SENSORS = 4;
 
 static const int DATA_TIME_INTERVAL = 2;
-static const int DATA_EMG_LENGTH = 200 * DATA_TIME_INTERVAL;
-static const int DATA_ORI_LENGTH = 50 * DATA_TIME_INTERVAL;;
-static const int DATA_ACC_LENGTH = 50 * DATA_TIME_INTERVAL;;
-static const int DATA_GYR_LENGTH = 50 * DATA_TIME_INTERVAL;;
+
+static const int FREQUENCE_EMG = 200;
+static const int FREQUENCE_ORI = 50;
+static const int FREQUENCE_ACC = 50;
+static const int FREQUENCE_GYR = 50;
+
+static const int DATA_EMG_LENGTH = FREQUENCE_EMG * DATA_TIME_INTERVAL;
+static const int DATA_ORI_LENGTH = FREQUENCE_ORI * DATA_TIME_INTERVAL;
+static const int DATA_ACC_LENGTH = FREQUENCE_ACC * DATA_TIME_INTERVAL;
+static const int DATA_GYR_LENGTH = FREQUENCE_GYR * DATA_TIME_INTERVAL;
+
+static const int DATA_EMG_LENGTH_MARGIN = 50;
+static const int DATA_ACC_LENGTH_MARGIN = 20;
+static const int DATA_GYR_LENGTH_MARGIN = 20;
+static const int DATA_ORI_LENGTH_MARGIN = 20;
+
 
 static const int NUMBER_OF_EMG_ARRAYS = 8;
 static const int NUMBER_OF_ACC_ARRAYS = 3;
@@ -49,25 +61,32 @@ std::string gestureToString(Gesture);
 Gesture gestureComparisons(std::string);
 
 class DataHandler{
-private:
-	std::string filename;
+protected:
 	double** emgArrays;
 	double** gyrArrays;
 	double** accArrays;
 	double** oriArrays;
 public:
-	DataHandler(std::string);
-
-	void generateDataArrays();
-
-	double** getEmgArrays();
-	double** getGyrArrays();
-	double** getAccArrays();
-	double** getOriArrays();
-
+	DataHandler();
 	double** getArrays(Sensor);
 };
 
+class DataFileHandler : public DataHandler{
+private:
+	std::string filename;
+public:
+	DataFileHandler(std::string);
+	void generateDataArrays();
+};
 
+class DataInputHandler : public DataHandler{
+private:
+public:
+	DataInputHandler();
+	void setSensorArray(int, int, double, Sensor);
+	void reset();
+};
+
+Gesture gestureComparisons2(DataInputHandler);
 
 #endif

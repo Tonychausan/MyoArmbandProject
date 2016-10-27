@@ -36,14 +36,23 @@ private:
 	// The values of this array is set by onGyroscopeData().
 	myo::Vector3<float> gyroData;
 
-	// Bool for create new gesture measurments
-	bool isCreatingNewGesture;
+
+	bool isEmgRecording ;
+	bool isOriRecording;
+	bool isGyrRecording;
+	bool isAccRecording;
 
 	// Counter for number of measurment for each gesture
-	int newGestureDataCounter;
+	int gestureEmgCounter;
+	int gestureGyrCounter;
+	int gestureAccCounter;
+	int gestureOriCounter;
 
-	// Name gesture
-	std::string gestureName;
+
+	int inputgestureEmgCounter;
+	DataInputHandler inputGesture;
+
+
 
 public:
 	DataCollector();
@@ -71,8 +80,11 @@ public:
 	void printOrientation();
 	void printAccelerometer();
 
-	// 
-	void createNewGestureOn(bool, std::string);
+	void gestureRecordOn();
+	void gestureRecordOff();
+	bool isRecording();
+	void setInputGestureAt(int, int, double, Sensor);
+
 };
 
 void printVector3(myo::Vector3<float> vector);
