@@ -73,56 +73,23 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const m
 	pitch_w = static_cast<int>((pitch + (float)M_PI / 2.0f) / M_PI * 18);
 	yaw_w = static_cast<int>((yaw + (float)M_PI) / (M_PI * 2.0f) * 18);
 
-
-	if (isOriRecording && gestureOriCounter < DATA_ORI_LENGTH){
-		double* ori = new double[NUMBER_OF_ORI_ARRAYS];
-		ori[0] = quat.x();
-		ori[1] = quat.y();
-		ori[2] = quat.z();
-		ori[3] = quat.w();
-
-		for (int i = 0; i < NUMBER_OF_ORI_ARRAYS; i++) {
-			inputGesture.setSensorArray(gestureOriCounter, i, (double) ori[i], ORI);
-		}
-		//std::cout << gestureOriCounter << std::endl;
-		gestureOriCounter += 1;
-	}
-	else if (isOriRecording){
-		isOriRecording = false;
-	}
+	// Recorder for Orientation Data
+	recorder(ORI, quat);
 
 }
 
 void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, const myo::Vector3<float> &accel){
 	accelerometerData = accel;
 
-	if (isAccRecording && gestureAccCounter < DATA_ACC_LENGTH){
-		for (int i = 0; i < NUMBER_OF_ACC_ARRAYS; i++) {
-			inputGesture.setSensorArray(gestureAccCounter, i, (double) accel[i], ACC);
-		}
-		//std::cout << gestureAccCounter << std::endl;
-		gestureAccCounter += 1;
-	}
-	else if (isAccRecording){
-		isAccRecording = false;
-	}
+	// Recorder for Accelerometer Data
+	recorder(ACC, accel);
 }
 
 void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3< float > & gyro)
 {
 	gyroData = gyro;
 
-	/*if (isGyrRecording && gestureGyrCounter < DATA_GYR_LENGTH){
-		for (int i = 0; i < NUMBER_OF_GYR_ARRAYS; i++) {
-			inputGesture.setSensorArray(gestureGyrCounter, i, (double) gyro[i], GYR);
-		}
-		//std::cout << gestureGyrCounter << std::endl;
-		gestureGyrCounter += 1;
-	}
-	else if (isGyrRecording){
-		isGyrRecording = false;
-	}*/
-
+	// Recorder for Gyroscope Data
 	recorder(GYR, gyro);
 }
 
@@ -133,17 +100,10 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 		emgSamples[i] = emg[i];
 	}
 
-	if (isEmgRecording  && gestureEmgCounter < DATA_EMG_LENGTH){
-		for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++) {
-			inputGesture.setSensorArray(gestureEmgCounter, i, (int) emg[i], EMG);
-		}
-		//std::cout << gestureEmgCounter << " ";
-		gestureEmgCounter += 1;
-	}
-	else if (isEmgRecording){
-		isEmgRecording = false;
-	}
+	// Recorder for EMG Data
+	recorder(EMG, emg);
 
+	// Turn off recording if all the sensors are finished, using highest frequency sensor
 	if (isRecording && !isRecordingFinished()){
 		gestureRecordOff();
 	}
@@ -285,13 +245,43 @@ void DataCollector::gestureRecordOn(){
 }
 
 void DataCollector::gestureRecordOff(){
-
 	std::cout << "gesture recording finished..." << std::endl << std::endl;
 	std::cout << gestureToString(gestureComparisons2(inputGesture)) << std::endl;
+
+	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
 
 	isRecording  = false;
 }
 
+void DataCollector::recorder(Sensor sensor, myo::Quaternion<float> quat){
+	bool *isRecording = NULL;
+	int *counter = NULL;
+	
+	isRecording = &isOriRecording;
+	counter = &gestureOriCounter;
+
+	int dataLength;
+	int numberOfArrays;
+
+	setDataLengt(dataLength, sensor);
+	setNumberOfArrays(numberOfArrays, sensor);
+
+	if (*isRecording && *counter < dataLength){
+		for (int i = 0; i < numberOfArrays; i++) {
+			double* ori = new double[NUMBER_OF_ORI_ARRAYS];
+			ori[0] = quat.x();
+			ori[1] = quat.y();
+			ori[2] = quat.z();
+			ori[3] = quat.w();
+			inputGesture.setSensorArray(*counter, i, (double)ori[i], sensor);
+		}
+		//std::cout << *counter<< std::endl;
+		*counter += 1;
+	}
+	else if (*isRecording){
+		*isRecording = false;
+	}
+}
 
 template <typename DataArray>
 void DataCollector::recorder(Sensor sensor, DataArray array){
@@ -310,19 +300,17 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 		isRecording = &isGyrRecording;
 		counter = &gestureGyrCounter;
 		break;
-	case ORI:
-		isRecording = &isOriRecording;
-		counter = &gestureOriCounter;
-		break;
 	}
 
 	int dataLength;
 	int numberOfArrays;
+	int dataLengthMargin;
 
 	setDataLengt(dataLength, sensor);
 	setNumberOfArrays(numberOfArrays, sensor);
+	setdataLengthMargin(dataLengthMargin, sensor);
 
-	if (*isRecording && *counter < dataLength){
+	if (*isRecording && *counter < dataLength + dataLengthMargin){
 		for (int i = 0; i < numberOfArrays; i++) {
 			if (sensor == EMG){
 				inputGesture.setSensorArray(*counter, i, (int)array[i], sensor);
@@ -332,7 +320,7 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 				inputGesture.setSensorArray(*counter, i, (double)array[i], sensor);
 			}
 		}
-		std::cout << *counter<< std::endl;
+		//std::cout << *counter<< std::endl;
 		*counter += 1;
 	}
 	else if (*isRecording){
@@ -340,6 +328,7 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 	}
 }
 
+// Check if all sensor have finished
 bool DataCollector::isRecordingFinished(){
 	return isEmgRecording || isAccRecording || isOriRecording || isGyrRecording;
 }

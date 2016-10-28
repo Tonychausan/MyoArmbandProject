@@ -222,15 +222,52 @@ void setNumberOfArrays(int &numberOfArrays, Sensor sensor){
 	}
 };
 
+void setdataLengthMargin(int &margin, Sensor sensor){
+	switch (sensor){
+	case EMG:
+		margin = DATA_EMG_LENGTH_MARGIN;
+		break;
+	case ACC:
+		margin = DATA_ACC_LENGTH_MARGIN;
+		break;
+	case GYR:
+		margin = DATA_GYR_LENGTH_MARGIN;
+		break;
+	case ORI:
+		margin = DATA_ORI_LENGTH_MARGIN;
+		break;
+	}
+}
+
+std::string getJsonArrayNameBySensor(Sensor sensor){
+	switch (sensor){
+	case EMG:
+		return "emg";
+		break;
+	case ACC:
+		return "acc";
+		break;
+	case GYR:
+		return "gyr";
+		break;
+	case ORI:
+		return "ori";
+		break;
+	}
+	return "";
+}
+
 double compareArrays(double** in, double** test, Sensor sensor){
 	int numberOfArrays;
 	int dataLength;
+	int dataLengthMargin;
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
+	setdataLengthMargin(dataLengthMargin, sensor);
 
 	double r = 0;
-	for (int i = 0; i < numberOfArrays; i++)
+	for (int i = 0; i < numberOfArrays + dataLengthMargin; i++)
 	{
 		r += crossCorrelation(dataLength/2, in[i], test[i], dataLength);
 	}
@@ -265,7 +302,6 @@ Gesture gestureComparisons(std::string testfile){
 	}
 	return prediction;
 }
-
 Gesture gestureComparisons2(DataInputHandler gestureInput){
 	Gesture prediction = NONE;
 	double r = 0.0;
@@ -312,6 +348,9 @@ void DataFileHandler::generateDataArrays(){
 	Json::Reader reader;
 	Json::Value obj;
 	reader.parse(ifs, obj);
+
+
+
 	const Json::Value& emg = obj["emg"];
 	const Json::Value& data = emg["data"];
 
@@ -407,11 +446,13 @@ DataInputHandler::DataInputHandler(){
 void DataInputHandler::setSensorArray(int i, int j, double value, Sensor sensor){
 	int numberOfArrays;
 	int dataLength;
+	int dataLengthMargin;
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
+	setdataLengthMargin(dataLengthMargin, sensor);
 
-	if (j > numberOfArrays || i > dataLength)
+	if (j > numberOfArrays || i > dataLength + dataLengthMargin)
 	{
 		std::cout << sensorToString(sensor) << ": Out of bound in setSensorArray!! ("<< i << "," << j << ")" << std::endl;
 		return;

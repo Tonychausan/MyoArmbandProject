@@ -26,6 +26,7 @@
 #include <json/json.h>
 
 volatile bool isRecording = false;
+volatile bool dummy = false;
 
 void keyboardInterruptDetector()
 {
@@ -35,7 +36,14 @@ void keyboardInterruptDetector()
 		{
 			//Sleep(5000);
 			//std::cout << "Press enter to try a gesture..." << std::endl;
-			system("pause");
+			//system("pause");
+			if (!dummy)
+			{
+				std::cin.ignore();
+				dummy = true;
+			}
+
+			std::cin.ignore();
 			isRecording = true;
 		}
 	}
@@ -113,8 +121,10 @@ int main(int argc, char** argv)
 		}
 		else {
 			isProgramRunning = true;
-
+			std::cout << RECORD_PRESTART_MESSEGE << std::endl;
 			std::thread keyboardInterrupt(keyboardInterruptDetector);
+
+
 			while (isProgramRunning){
 				if (isRecording){
 					collector.gestureRecordOn();

@@ -86,8 +86,11 @@ public:
 	void gestureRecordOff();
 	bool isRecordingFinished();
 
+	void recorder(Sensor, myo::Quaternion<float>);
+
 	template <typename DataArray>
 	void recorder(Sensor, DataArray);
+
 	void setInputGestureAt(int, int, double, Sensor);
 
 };
