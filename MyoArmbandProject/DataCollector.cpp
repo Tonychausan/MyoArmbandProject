@@ -3,7 +3,6 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
 // Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #define _USE_MATH_DEFINES
-#define GESTURE_DATA_SIZE 400
 
 #include <cmath>
 #include <iostream>
@@ -23,7 +22,7 @@
 #include <myo/myo.hpp>
 
 DataCollector::DataCollector()
-	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), emgSamples()
+	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose()
 	{
 		isRecording = false;
 
@@ -246,7 +245,7 @@ void DataCollector::gestureRecordOn(){
 
 void DataCollector::gestureRecordOff(){
 	std::cout << "gesture recording finished..." << std::endl << std::endl;
-	std::cout << gestureToString(gestureComparisons2(inputGesture)) << std::endl;
+	std::cout << gestureToString(gestureComparisons(inputGesture)) << std::endl;
 
 	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
 
@@ -273,7 +272,7 @@ void DataCollector::recorder(Sensor sensor, myo::Quaternion<float> quat){
 			ori[1] = quat.y();
 			ori[2] = quat.z();
 			ori[3] = quat.w();
-			inputGesture.setSensorArray(*counter, i, (double)ori[i], sensor);
+			inputGesture.setSensorArrayValueAt(*counter, i, (double)ori[i], sensor);
 		}
 		//std::cout << *counter<< std::endl;
 		*counter += 1;
@@ -313,11 +312,11 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 	if (*isRecording && *counter < dataLength + dataLengthMargin){
 		for (int i = 0; i < numberOfArrays; i++) {
 			if (sensor == EMG){
-				inputGesture.setSensorArray(*counter, i, (int)array[i], sensor);
+				inputGesture.setSensorArrayValueAt(*counter, i, (int)array[i], sensor);
 			}
 			else
 			{
-				inputGesture.setSensorArray(*counter, i, (double)array[i], sensor);
+				inputGesture.setSensorArrayValueAt(*counter, i, (double)array[i], sensor);
 			}
 		}
 		//std::cout << *counter<< std::endl;
@@ -334,7 +333,7 @@ bool DataCollector::isRecordingFinished(){
 }
 
 void DataCollector::setInputGestureAt(int i, int j, double value, Sensor sensor){
-	inputGesture.setSensorArray(i,j,value,sensor);
+	inputGesture.setSensorArrayValueAt(i,j,value,sensor);
 }
 
 

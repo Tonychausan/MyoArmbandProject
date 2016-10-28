@@ -4,6 +4,7 @@
 #include <string>
 #include <array>
 #include <myo/myo.hpp>
+#include <json/json.h>
 
 volatile static bool isProgramRunning = true;
 
@@ -67,7 +68,7 @@ void compressJsonFile(std::string);
 
 std::string gestureToString(Gesture);
 
-Gesture gestureComparisons(std::string);
+Gesture gestureComparisonsJsonFile(std::string);
 
 void setDataLengt(int&, Sensor);
 void setNumberOfArrays(int&, Sensor);
@@ -81,6 +82,8 @@ protected:
 	double** oriArrays;
 public:
 	DataHandler();
+	void setSensorArray(double**, Sensor);
+	double** getWorkingArrays(Sensor);
 	double** getArrays(Sensor);
 };
 
@@ -89,6 +92,7 @@ private:
 	std::string filename;
 public:
 	DataFileHandler(std::string);
+	void generateSensorDataArray(Json::Value, Sensor);
 	void generateDataArrays();
 };
 
@@ -96,10 +100,11 @@ class DataInputHandler : public DataHandler{
 private:
 public:
 	DataInputHandler();
-	void setSensorArray(int, int, double, Sensor);
+	void generateSensorArrays(Sensor);
+	void setSensorArrayValueAt(int, int, double, Sensor);
 	void reset();
 };
 
-Gesture gestureComparisons2(DataInputHandler);
+Gesture gestureComparisons(DataInputHandler);
 
 #endif
