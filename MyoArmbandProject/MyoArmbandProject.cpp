@@ -33,7 +33,7 @@ void keyboardInterruptDetector()
 	{
 		if (!isRecording)
 		{
-			Sleep(5000);
+			//Sleep(5000);
 			//std::cout << "Press enter to try a gesture..." << std::endl;
 			system("pause");
 			isRecording = true;

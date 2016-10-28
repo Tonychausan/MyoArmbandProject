@@ -37,19 +37,21 @@ private:
 	myo::Vector3<float> gyroData;
 
 
-	bool isGestureRecording;
+	bool isRecording;
+
+	bool isEmgRecording;
 	bool isOriRecording;
 	bool isGyrRecording;
 	bool isAccRecording;
 
 	// Counter for number of measurment for each gesture
-	int gestureCounter;
+	int gestureEmgCounter;
 	int gestureGyrCounter;
 	int gestureAccCounter;
 	int gestureOriCounter;
 
 
-	int inputGestureCounter;
+	int inputgestureEmgCounter;
 	DataInputHandler inputGesture;
 
 
@@ -82,7 +84,10 @@ public:
 
 	void gestureRecordOn();
 	void gestureRecordOff();
-	bool isRecording();
+	bool isRecordingFinished();
+
+	template <typename DataArray>
+	void recorder(Sensor, DataArray);
 	void setInputGestureAt(int, int, double, Sensor);
 
 };

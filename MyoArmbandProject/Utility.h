@@ -60,6 +60,9 @@ std::string gestureToString(Gesture);
 
 Gesture gestureComparisons(std::string);
 
+void setDataLengt(int&, Sensor);
+void setNumberOfArrays(int&, Sensor);
+
 class DataHandler{
 protected:
 	double** emgArrays;

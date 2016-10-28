@@ -222,7 +222,6 @@ void setNumberOfArrays(int &numberOfArrays, Sensor sensor){
 	}
 };
 
-
 double compareArrays(double** in, double** test, Sensor sensor){
 	int numberOfArrays;
 	int dataLength;
