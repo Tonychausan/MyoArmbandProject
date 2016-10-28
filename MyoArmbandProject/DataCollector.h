@@ -36,7 +36,6 @@ private:
 	// The values of this array is set by onGyroscopeData().
 	myo::Vector3<float> gyroData;
 
-
 	bool isRecording;
 
 	bool isEmgRecording;

@@ -103,7 +103,13 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	recorder(EMG, emg);
 
 	// Turn off recording if all the sensors are finished, using highest frequency sensor
+	if (isRecording && gestureEmgCounter % (DATA_EMG_LENGTH/10) == 0)
+	{
+		std::cout << ".";
+	}
+
 	if (isRecording && !isRecordingFinished()){
+		std::cout << std::endl;
 		gestureRecordOff();
 	}
 }
@@ -245,8 +251,10 @@ void DataCollector::gestureRecordOn(){
 
 void DataCollector::gestureRecordOff(){
 	std::cout << "gesture recording finished..." << std::endl << std::endl;
-	std::cout << gestureToString(gestureComparisons(inputGesture)) << std::endl;
 
+	Gesture prediction = gestureComparisons(inputGesture);
+
+	std::cout << gestureToString(prediction) << std::endl;
 	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
 
 	isRecording  = false;
