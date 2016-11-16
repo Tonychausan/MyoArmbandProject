@@ -34,15 +34,12 @@ void keyboardInterruptDetector()
 	{
 		if (!isRecording)
 		{
-			//Sleep(5000);
-			//std::cout << "Press enter to try a gesture..." << std::endl;
-			//system("pause");
+			// prevent first time auto-start bug
 			if (!dummy)
 			{
 				std::cin.ignore();
 				dummy = true;
 			}
-
 			std::cin.ignore();
 			isRecording = true;
 		}
@@ -50,11 +47,20 @@ void keyboardInterruptDetector()
 	
 }
 
-
+void testFile(std::string filename, Gesture gesture){
+	Gesture prediction = gestureComparisonsJsonFile(filename);
+	std::cout << "Test file: " << filename << std::endl;
+	std::cout << "Gesture: " << gestureToString(gesture) << std::endl;
+	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
+}
 
 int main(int argc, char** argv)
 {
 	// We catch any exceptions that might occur below -- see the catch statement for more details.
+	// Action menu
+	int action = 0;
+
+
 	try {
 		// First, we create a Hub with our application identifier. Be sure not to use the com.example namespace when
 		// publishing your application. The Hub provides access to one or more Myos.
@@ -71,6 +77,7 @@ int main(int argc, char** argv)
 		// If waitForMyo() returned a null pointer, we failed to find a Myo, so exit with an error message.
 		if (!myo) {
 			throw std::runtime_error("Unable to find a Myo!");
+			std::cin.ignore();
 		}
 
 		// We've found a Myo.
@@ -87,52 +94,64 @@ int main(int argc, char** argv)
 		hub.addListener(&collector);
 			
 		// Finally we enter our main loop.
-
-		// Variable
-		int action = 0;
-
-		// Action menu
-		std::cout << "Choose an action" << std::endl;
-		std::cout << "1) Try gestures" << std::endl;
-		std::cout << "2) Measurment display" << std::endl;
-		std::cout << "3) Compress files" << std::endl;
-		std::cin >> action;
-
 		isProgramRunning = false;
-		if (action == 3){
-			compressAllJsonFiles();
-		}
-		else if (action == 2){
-			isProgramRunning = true;
-			while (isProgramRunning) {
 
-				// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
-				// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
-				hub.run(1000 / 5);
+		while (true){
+			clearScreen();
+			std::cout << "Choose an action" << std::endl;
+			std::cout << "1) Try gestures" << std::endl;
+			std::cout << "2) Measurment display" << std::endl;
+			std::cout << "3) Compress files" << std::endl;
+			std::cout << "4) Pre-data gesture comparison" << std::endl;
+			std::cin >> action;
 
+			// Compress files
+			if (action == 3){
+				compressAllJsonFiles();
+				std::cin.ignore();
 				clearScreen();
-
-				collector.printStatus();
-				collector.printEMG();
-				collector.printAccelerometer();
-				collector.printGyro();
-				collector.printOrientation();
 			}
-		}
-		else {
-			isProgramRunning = true;
-			std::cout << RECORD_PRESTART_MESSEGE << std::endl;
-			std::thread keyboardInterrupt(keyboardInterruptDetector);
+			// Print Measurment
+			else if (action == 2){
+				isProgramRunning = true;
+				while (isProgramRunning) {
+					// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
+					// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
+					hub.run(1000 / 5);
 
+					clearScreen();
 
-			while (isProgramRunning){
-				if (isRecording){
-					collector.gestureRecordOn();
-					isRecording = false;
+					collector.printStatus();
+					collector.printEMG();
+					collector.printAccelerometer();
+					collector.printGyro();
+					collector.printOrientation();
 				}
-				hub.run(1000 / 5);
 			}
-			keyboardInterrupt.join();
+			// Test gestures with pre-sampled file tests
+			else if (action == 4){
+
+				testFile("compressed-test-sleep01.json", SLEEP);
+				testFile("compressed-test-thankyou01.json", THANKYOU);
+
+				system("PAUSE");
+			}
+			// Try some gesture recording
+			else {
+				isProgramRunning = true;
+				std::cout << RECORD_PRESTART_MESSEGE << std::endl;
+				std::thread keyboardInterrupt(keyboardInterruptDetector);
+
+
+				while (isProgramRunning){
+					if (isRecording){
+						collector.gestureRecordOn();
+						isRecording = false;
+					}
+					hub.run(1000 / 5);
+				}
+				keyboardInterrupt.join();
+			}
 		}
 	}
 	catch (const std::exception& e) {

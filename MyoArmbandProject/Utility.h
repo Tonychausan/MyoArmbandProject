@@ -15,8 +15,12 @@ static const std::string RECORD_PRESTART_MESSEGE = "Press <Enter> to start recor
 
 
 // List of sensors
-enum Sensor{ EMG, ACC, ORI, GYR };
+enum Sensor{ EMG, ACC, ORI, GYR, EMPTY_SENSOR};
 static const int NUMBER_OF_SENSORS = 4;
+
+// List of sensors to ignor in the gesture prediction
+static Sensor sensorToIgnor[] = {EMG, EMPTY_SENSOR};
+static const int sensorToIgnorLength = 1;
 
 static const int DATA_TIME_INTERVAL = 2; //Gesture interval for recording
 
@@ -32,11 +36,6 @@ static const int DATA_ORI_LENGTH = FREQUENCE_ORI * DATA_TIME_INTERVAL;
 static const int DATA_ACC_LENGTH = FREQUENCE_ACC * DATA_TIME_INTERVAL;
 static const int DATA_GYR_LENGTH = FREQUENCE_GYR * DATA_TIME_INTERVAL;
 
-static const int DATA_EMG_LENGTH_MARGIN = 0;//50;
-static const int DATA_ACC_LENGTH_MARGIN = 0;//20;
-static const int DATA_GYR_LENGTH_MARGIN = 0;//20;
-static const int DATA_ORI_LENGTH_MARGIN = 0;//20;
-
 //Number of arrays for each sensor 
 static const int NUMBER_OF_EMG_ARRAYS = 8;
 static const int NUMBER_OF_ACC_ARRAYS = 3;
@@ -45,8 +44,8 @@ static const int NUMBER_OF_ORI_ARRAYS = 4;
 
 
 // List of pre-sampled gestures
-enum Gesture{ EAT, HELP, NONE };
-static const int NUMBER_OF_GESTURES = 2;
+enum Gesture{ EAT, HELP, SLEEP, THANKYOU, WHY, NONE };
+static const int NUMBER_OF_GESTURES = 5;
 
 // List of pre-sample files
 static std::string testFileList[] = {
@@ -55,10 +54,25 @@ static std::string testFileList[] = {
 		"eat03.json",
 		"help01.json",
 		"help02.json",
-		"help03.json"
+		"help03.json",
+		"sleep01.json",
+		"sleep02.json",
+		"sleep03.json",
+		"thankyou01.json",
+		"thankyou02.json",
+		"thankyou03.json",
+		"why01.json",
+		"why02.json",
+		"why03.json"
 	};
 static const int NUMBER_OF_TEST_PER_GESTURE = 3; // pre-samples per gesture
 static const int testFileListSize = NUMBER_OF_GESTURES * NUMBER_OF_TEST_PER_GESTURE;
+
+static std::string preSampledRecordFileList[] = {
+	"test-sleep01.json",
+	"test-thankyou01.json"
+};
+static const int  preSampledRecordFileListSize = 2;
 
 void clearScreen();
 double crossCorrelation(int, double*, double*, int);
@@ -66,7 +80,10 @@ double crossCorrelation(int, double*, double*, int);
 void compressAllJsonFiles();
 void compressJsonFile(std::string);
 
+bool isThisSensorIgnored(Sensor);
+
 std::string gestureToString(Gesture);
+std::string sensorToString(Sensor);
 
 Gesture gestureComparisonsJsonFile(std::string);
 
@@ -105,6 +122,6 @@ public:
 	void reset();
 };
 
-Gesture gestureComparisons(DataInputHandler);
+Gesture gestureComparisons(DataHandler);
 
 #endif

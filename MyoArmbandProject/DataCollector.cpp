@@ -254,7 +254,7 @@ void DataCollector::gestureRecordOff(){
 
 	Gesture prediction = gestureComparisons(inputGesture);
 
-	std::cout << gestureToString(prediction) << std::endl;
+	std::cout << "Prediction: " << gestureToString(prediction) << std::endl;
 	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
 
 	isRecording  = false;
@@ -309,15 +309,12 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 		break;
 	}
 
-	int dataLength;
-	int numberOfArrays;
-	int dataLengthMargin;
+	int dataLength, numberOfArrays;
 
 	setDataLengt(dataLength, sensor);
 	setNumberOfArrays(numberOfArrays, sensor);
-	setdataLengthMargin(dataLengthMargin, sensor);
 
-	if (*isRecording && *counter < dataLength + dataLengthMargin){
+	if (*isRecording && *counter < dataLength){
 		for (int i = 0; i < numberOfArrays; i++) {
 			if (sensor == EMG){
 				inputGesture.setSensorArrayValueAt(*counter, i, (int)array[i], sensor);

@@ -120,6 +120,10 @@ void compressAllJsonFiles(){
 	for (int i = 0; i < testFileListSize; i++){
 		compressJsonFile(testFileList[i]);
 	}
+	for (int i = 0; i < preSampledRecordFileListSize; i++){
+		compressJsonFile(preSampledRecordFileList[i]);
+	}
+
 	std::cout << "Comppression finished!" << std::endl;
 }
 void compressJsonFile(std::string name){
@@ -148,7 +152,7 @@ void compressJsonFile(std::string name){
 	Json::StyledWriter styledWriter;
 	file_id << styledWriter.write(event);
 
-	file_id.close();
+	//file_id.close();
 }
 std::string getCompressedFilename(int i){
 	std::string  name = "compressed-";
@@ -163,6 +167,15 @@ std::string gestureToString(Gesture gesture){
 		break;
 	case HELP:
 		return "HELP";
+		break;
+	case SLEEP:
+		return "SLEEP";
+		break;
+	case THANKYOU:
+		return "THANKYOU";
+		break;
+	case WHY:
+		return "WHY";
 		break;
 
 	default:
@@ -188,6 +201,15 @@ std::string sensorToString(Sensor sensor){
 	default:
 		return "";
 	}
+}
+
+bool isThisSensorIgnored(Sensor sensor){
+	for (int i = 0; i < sensorToIgnorLength; i++){
+		if (sensor == sensorToIgnor[i]){
+			return true;
+		}
+	}
+	return false;
 }
 
 void setDataLengt(int &dataLength, Sensor sensor){
@@ -224,23 +246,6 @@ void setNumberOfArrays(int &numberOfArrays, Sensor sensor){
 	}
 };
 
-void setdataLengthMargin(int &margin, Sensor sensor){
-	switch (sensor){
-	case EMG:
-		margin = DATA_EMG_LENGTH_MARGIN;
-		break;
-	case ACC:
-		margin = DATA_ACC_LENGTH_MARGIN;
-		break;
-	case GYR:
-		margin = DATA_GYR_LENGTH_MARGIN;
-		break;
-	case ORI:
-		margin = DATA_ORI_LENGTH_MARGIN;
-		break;
-	}
-}
-
 std::string getJsonArrayNameBySensor(Sensor sensor){
 	switch (sensor){
 	case EMG:
@@ -256,14 +261,13 @@ std::string getJsonArrayNameBySensor(Sensor sensor){
 }
 
 double compareArrays(double** in, double** test, Sensor sensor){
-	int numberOfArrays, dataLength, dataLengthMargin;
+	int numberOfArrays, dataLength;
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
-	setdataLengthMargin(dataLengthMargin, sensor);
 
 	double r = 0;
-	for (int i = 0; i < numberOfArrays + dataLengthMargin; i++)
+	for (int i = 0; i < numberOfArrays; i++)
 	{
 		r += crossCorrelation(dataLength/2, in[i], test[i], dataLength);
 	}
@@ -271,8 +275,26 @@ double compareArrays(double** in, double** test, Sensor sensor){
 }
 
 Gesture gestureComparisonsJsonFile(std::string testfile){
-	Gesture prediction = NONE;
 	DataFileHandler gestureInput(testfile);
+	return gestureComparisons(gestureInput);
+}
+
+Gesture gestureComparisons(DataHandler gestureInput){
+	if (sensorToIgnorLength > 0)
+	{
+		std::cout << "Sensor ignored: ";
+		Sensor sensor = sensorToIgnor[0];
+		std::cout << sensorToString(sensor);
+		for (int k = 1; k < sensorToIgnorLength; k++)
+		{
+			sensor = sensorToIgnor[k];
+			std::cout << ", " << sensorToString(sensor);
+		}
+
+		std::cout << std::endl << std::endl;
+	}
+
+	Gesture prediction = NONE;
 	double r = 0.0;
 
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
@@ -281,42 +303,21 @@ Gesture gestureComparisonsJsonFile(std::string testfile){
 		for (int j = 0; j < NUMBER_OF_TEST_PER_GESTURE; j++)
 		{
 			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
-			std::cout << testFilename << std::endl;
+			std::cout << testFilename;
 			DataFileHandler testGesture(testFilename);
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
 				Sensor sensor = static_cast<Sensor>(k);
+				if (isThisSensorIgnored(sensor))
+					continue;
 				temp_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
 			}
-		}
-		std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << temp_r << std::endl;
-		if (temp_r > r)
-		{
-			r = temp_r;
-			prediction = static_cast<Gesture>(i);
-		}
-	}
-	return prediction;
-}
-Gesture gestureComparisons(DataInputHandler gestureInput){
-	Gesture prediction = NONE;
-	double r = 0.0;
 
-	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
-	{
-		double temp_r = 0.0;
-		for (int j = 0; j < NUMBER_OF_TEST_PER_GESTURE; j++)
-		{
-			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
-			std::cout << testFilename << std::endl;
-			DataFileHandler testGesture(testFilename);
-			for (int k = 0; k < 2; k++)
-			{
-				Sensor sensor = static_cast<Sensor>(k);
-				temp_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
-			}
+			std::cout << '\r';
+			std::cout << "                                                                                      ";
+			std::cout << '\r';
 		}
-		std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << temp_r << std::endl;
+		std::cout << gestureToString(static_cast<Gesture>(i)) << ": r = " << temp_r << std::endl;
 		if (temp_r > r)
 		{
 			r = temp_r;
@@ -345,11 +346,10 @@ void DataFileHandler::generateSensorDataArray(Json::Value obj, Sensor sensor){
 	const Json::Value& jsonObject = obj[getJsonArrayNameBySensor(sensor)];
 	const Json::Value& data = jsonObject["data"];
 
-	int numberOfArrays, dataLength, dataLengthMargin;
+	int numberOfArrays, dataLength;
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
-	setdataLengthMargin(dataLengthMargin, sensor);
 
 	double **workArrays = new double*[numberOfArrays];
 	for (int i = 0; i < numberOfArrays; i++)
@@ -437,11 +437,10 @@ DataInputHandler::DataInputHandler(){
 }
 
 void DataInputHandler::generateSensorArrays(Sensor sensor){
-	int numberOfArrays, dataLength, dataLengthMargin;
+	int numberOfArrays, dataLength;
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
-	setdataLengthMargin(dataLengthMargin, sensor);
 
 	double **workArrays = new double*[numberOfArrays];
 	for (int i = 0; i < numberOfArrays; i++)
@@ -453,13 +452,12 @@ void DataInputHandler::generateSensorArrays(Sensor sensor){
 }
 
 void DataInputHandler::setSensorArrayValueAt(int i, int j, double value, Sensor sensor){
-	int numberOfArrays, dataLength, dataLengthMargin;
+	int numberOfArrays, dataLength;
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
-	setdataLengthMargin(dataLengthMargin, sensor);
 
-	if (j > numberOfArrays || i > dataLength + dataLengthMargin)
+	if (j > numberOfArrays || i > dataLength)
 	{
 		std::cout << sensorToString(sensor) << ": Out of bound in setSensorArrayValueAt!! ("<< i << "," << j << ")" << std::endl;
 		return;
