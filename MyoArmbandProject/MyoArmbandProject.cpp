@@ -48,9 +48,10 @@ void keyboardInterruptDetector()
 }
 
 void testFile(std::string filename, Gesture gesture){
-	Gesture prediction = gestureComparisonsJsonFile(filename);
-	std::cout << "Test file: " << filename << std::endl;
-	std::cout << "Gesture: " << gestureToString(gesture) << std::endl;
+	std::cout << "##############################"<< std::endl << "Test file: " << filename << std::endl;
+
+	Gesture prediction = gestureComparisonsJsonFile(getCompressedFilename(filename));
+	std::cout << std::endl << "Gesture: " << gestureToString(gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
 }
 
@@ -131,8 +132,13 @@ int main(int argc, char** argv)
 			// Test gestures with pre-sampled file tests
 			else if (action == 4){
 
-				testFile("compressed-test-sleep01.json", SLEEP);
-				testFile("compressed-test-thankyou01.json", THANKYOU);
+				/*testFile("compressed-test-sleep01.json", SLEEP);
+				testFile("compressed-test-thankyou01.json", THANKYOU);*/
+
+				for (int i = 0; i < preSampledRecordFileListSize; i++)
+				{
+					testFile(preSampledRecordFileList[i], preSampledRecordPredictionList[i]);
+				}
 
 				system("PAUSE");
 			}

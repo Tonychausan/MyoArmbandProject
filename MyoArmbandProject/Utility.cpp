@@ -82,17 +82,12 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 				continue;
 			else
 				sxy += (x[i] - xFirst - mx) * (y[j] - yFirst - my);
-			/* Or should it be (?)
-			if (j < 0 || j >= n)
-			sxy += (x[i] - mx) * (-my);
-			else
-			sxy += (x[i] - mx) * (y[j] - my);
-			*/
 		}
 		
-		if (abs(r) < abs(sxy/denom)){
+		if (r < sxy / denom){
 			r = sxy / denom;
 		}
+
 
 		/* r is the correlation coefficient at "delay" */
 
@@ -155,8 +150,12 @@ void compressJsonFile(std::string name){
 	//file_id.close();
 }
 std::string getCompressedFilename(int i){
+	return getCompressedFilename(testFileList[i]);
+}
+
+std::string getCompressedFilename(std::string filename){
 	std::string  name = "compressed-";
-	name.append(testFileList[i]);
+	name.append(filename);
 	return name;
 }
 
@@ -269,7 +268,8 @@ double compareArrays(double** in, double** test, Sensor sensor){
 	double r = 0;
 	for (int i = 0; i < numberOfArrays; i++)
 	{
-		r += crossCorrelation(dataLength/2, in[i], test[i], dataLength);
+		r += crossCorrelation(dataLength / 2, in[i], test[i], dataLength);
+
 	}
 	return r / numberOfArrays;
 }
@@ -339,7 +339,6 @@ DataFileHandler::DataFileHandler(std::string name)
 
 	generateDataArrays();
 }
-
 
 
 void DataFileHandler::generateSensorDataArray(Json::Value obj, Sensor sensor){

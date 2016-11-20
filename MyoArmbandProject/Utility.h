@@ -18,11 +18,15 @@ static const std::string RECORD_PRESTART_MESSEGE = "Press <Enter> to start recor
 enum Sensor{ EMG, ACC, ORI, GYR, EMPTY_SENSOR};
 static const int NUMBER_OF_SENSORS = 4;
 
+/* ########################################################################### */
+/* ########################################################################### */
 // List of sensors to ignor in the gesture prediction
 static Sensor sensorToIgnor[] = {EMG, EMPTY_SENSOR};
-static const int sensorToIgnorLength = 1;
+static const int sensorToIgnorLength = 0;
+/* ########################################################################### */
+/* ########################################################################### */
 
-static const int DATA_TIME_INTERVAL = 2; //Gesture interval for recording
+static const int DATA_TIME_INTERVAL = 3; //Gesture interval for recording
 
 // Sample rate for each sensor
 static const int FREQUENCE_EMG = 200;
@@ -69,16 +73,33 @@ static const int NUMBER_OF_TEST_PER_GESTURE = 3; // pre-samples per gesture
 static const int testFileListSize = NUMBER_OF_GESTURES * NUMBER_OF_TEST_PER_GESTURE;
 
 static std::string preSampledRecordFileList[] = {
+	"test-eat01.json",
+	"test-eat02.json",
+	"test-help01.json",
+	"test-help02.json",
 	"test-sleep01.json",
-	"test-thankyou01.json"
+	"test-sleep02.json",
+	"test-thankyou01.json",
+	"test-why01.json"
 };
-static const int  preSampledRecordFileListSize = 2;
+static Gesture preSampledRecordPredictionList[] = {
+	EAT,
+	EAT,
+	HELP,
+	HELP,
+	SLEEP,
+	SLEEP,
+	THANKYOU,
+	WHY
+};
+static const int  preSampledRecordFileListSize = 8;
 
 void clearScreen();
 double crossCorrelation(int, double*, double*, int);
 
 void compressAllJsonFiles();
 void compressJsonFile(std::string);
+std::string getCompressedFilename(std::string);
 
 bool isThisSensorIgnored(Sensor);
 
