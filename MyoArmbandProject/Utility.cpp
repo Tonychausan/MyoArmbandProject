@@ -8,6 +8,8 @@
 
 #include "Utility.h"
 
+#define min(a,b) (((a)<(b)) ? (a):(b))
+
 void clearScreen()
 {
 	HANDLE                     hStdOut;
@@ -93,6 +95,41 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 
 	}
 	return abs(r);
+}
+
+double CalculateEuclideanDistance(double x, double y) {
+	return std::sqrt(std::pow((x - y), 2));
+}
+
+double CalculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
+
+	size_t m = size;
+	size_t n = size;
+
+	// Allocate the Matrix to work on:
+	std::vector<std::vector<double>> cost(m, std::vector<double>(n));
+
+	cost[0][0] = CalculateEuclideanDistance(t0[0], t1[0]);
+
+	// Calculate the first row:
+	for (int i = 1; i < m; i++) {
+		cost[i][0] = cost[i - 1][0] + CalculateEuclideanDistance(t0[i], t1[0]);
+	}
+
+	// Calculate the first column:
+	for (int j = 1; j < n; j++) {
+		cost[0][j] = cost[0][j - 1] + CalculateEuclideanDistance(t0[0], t1[j]);
+	}
+
+	// Fill the matrix:
+	for (int i = 1; i < m; i++) {
+		for (int j = 1; j < n; j++) {
+			cost[i][j] = min(cost[i - 1][j], min(cost[i][j - 1], cost[i - 1][j - 1]))
+				+ CalculateEuclideanDistance(t0[i], t1[j]);
+		}
+	}
+
+	return cost[m - 1][n - 1];
 }
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArrays, int numberOfData){
@@ -269,6 +306,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 	for (int i = 0; i < numberOfArrays; i++)
 	{
 		r += crossCorrelation(dataLength / 2, in[i], test[i], dataLength);
+		//r += CalculateDynamicTimeWarpedDistance(in[i],test[i], dataLength);
 
 	}
 	return r / numberOfArrays;
@@ -296,7 +334,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 
 	Gesture prediction = NONE;
 	double r = 0.0;
-
+	//double r = -1;
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		double temp_r = 0.0;

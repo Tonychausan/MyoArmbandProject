@@ -21,7 +21,7 @@ static const int NUMBER_OF_SENSORS = 4;
 /* ########################################################################### */
 /* ########################################################################### */
 // List of sensors to ignor in the gesture prediction
-static Sensor sensorToIgnor[] = {EMG, EMPTY_SENSOR};
+static Sensor sensorToIgnor[] = {EMG, ACC, EMPTY_SENSOR};
 static const int sensorToIgnorLength = 0;
 /* ########################################################################### */
 /* ########################################################################### */
@@ -96,6 +96,9 @@ static const int  preSampledRecordFileListSize = 8;
 
 void clearScreen();
 double crossCorrelation(int, double*, double*, int);
+
+double calculateEuclideanDistance(double x, double y);
+double CalculateDynamicTimeWarpedDistance(double* t0, double* t1);
 
 void compressAllJsonFiles();
 void compressJsonFile(std::string);
