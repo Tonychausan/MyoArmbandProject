@@ -94,7 +94,7 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 		/* r is the correlation coefficient at "delay" */
 
 	}
-	return abs(r);
+	return r;
 }
 
 double CalculateEuclideanDistance(double x, double y) {
@@ -130,6 +130,38 @@ double CalculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
 	}
 
 	return cost[m - 1][n - 1];
+}
+
+double MaxSqrValue(double* array, int n){
+	double max = 0;
+	for (int i = 0; i < n; i++)
+	{
+		if (max < array[i]*array[i])
+		{
+			max = array[i]*array[i];
+		}
+	}
+	return max;
+}
+
+// x is in, y is test
+double EmgEnergyCompare(double* x, double* y, int n){
+	double xMaxSqrValue = MaxSqrValue(x, n);
+	double yMaxSqrValue = MaxSqrValue(y, n);
+
+	double sumX = 0.0;
+	double sumY = 0.0;
+	for (int i = 0; i < n; i++)
+	{
+		sumX += (x[i] * x[i])/xMaxSqrValue;
+		sumY += (y[i] * y[i])/yMaxSqrValue;
+	}
+	if (sumX < sumY){
+		return sumX/sumY;
+	}
+	else{
+		return sumY/sumX;
+	}
 }
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArrays, int numberOfData){
@@ -301,13 +333,18 @@ double compareArrays(double** in, double** test, Sensor sensor){
 
 	setNumberOfArrays(numberOfArrays, sensor);
 	setDataLengt(dataLength, sensor);
-
+	
 	double r = 0;
+	
 	for (int i = 0; i < numberOfArrays; i++)
 	{
-		r += crossCorrelation(dataLength / 2, in[i], test[i], dataLength);
-		//r += CalculateDynamicTimeWarpedDistance(in[i],test[i], dataLength);
-
+		if (sensor == EMG){
+			r += EmgEnergyCompare(in[i], test[i], dataLength);
+		}
+		else{
+			r += crossCorrelation(dataLength / 2, in[i], test[i], dataLength);
+			//r += CalculateDynamicTimeWarpedDistance(in[i],test[i], dataLength);
+		}
 	}
 	return r / numberOfArrays;
 }

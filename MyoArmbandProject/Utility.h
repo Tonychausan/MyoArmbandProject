@@ -21,8 +21,8 @@ static const int NUMBER_OF_SENSORS = 4;
 /* ########################################################################### */
 /* ########################################################################### */
 // List of sensors to ignor in the gesture prediction
-static Sensor sensorToIgnor[] = {EMG, ACC, EMPTY_SENSOR};
-static const int sensorToIgnorLength = 0;
+static Sensor sensorToIgnor[] = {EMG, EMPTY_SENSOR};
+static const int sensorToIgnorLength = 1;
 /* ########################################################################### */
 /* ########################################################################### */
 
@@ -93,6 +93,8 @@ static Gesture preSampledRecordPredictionList[] = {
 	WHY
 };
 static const int  preSampledRecordFileListSize = 8;
+
+static const int MAX_R = NUMBER_OF_TEST_PER_GESTURE * sensorToIgnorLength;
 
 void clearScreen();
 double crossCorrelation(int, double*, double*, int);
