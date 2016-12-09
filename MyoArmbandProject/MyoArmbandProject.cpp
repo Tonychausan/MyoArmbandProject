@@ -53,6 +53,20 @@ void testFile(std::string filename, Gesture gesture){
 	Gesture prediction = gestureComparisonsJsonFile(getCompressedFilename(filename));
 	std::cout << std::endl << "Gesture: " << gestureToString(gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
+
+	numberOfTestsForGesture[gesture] += 1;
+	if (prediction == gesture)
+	{
+		correctTests[gesture] += 1;
+	}
+}
+
+void initTest(){
+	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
+	{
+		correctTests[i] = 0;
+		numberOfTestsForGesture[i] = 0;
+	}
 }
 
 int main(int argc, char** argv)
@@ -131,13 +145,15 @@ int main(int argc, char** argv)
 			}
 			// Test gestures with pre-sampled file tests
 			else if (action == 4){
-
-				/*testFile("compressed-test-sleep01.json", SLEEP);
-				testFile("compressed-test-thankyou01.json", THANKYOU);*/
-
+				initTest();
 				for (int i = 0; i < preSampledRecordFileListSize; i++)
 				{
 					testFile(preSampledRecordFileList[i], preSampledRecordPredictionList[i]);
+				}
+
+				for (int i = 0; i < NUMBER_OF_GESTURES; i++)
+				{
+					std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << correctTests[i] << " of " << numberOfTestsForGesture[i] << std::endl;
 				}
 
 				system("PAUSE");

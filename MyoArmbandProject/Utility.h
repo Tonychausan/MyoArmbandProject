@@ -21,8 +21,11 @@ static const int NUMBER_OF_SENSORS = 4;
 /* ########################################################################### */
 /* ########################################################################### */
 // List of sensors to ignor in the gesture prediction
-static Sensor sensorToIgnor[] = {EMG, EMPTY_SENSOR};
-static const int sensorToIgnorLength = 1;
+static Sensor sensorToIgnor[] = {ACC,GYR,ORI, EMPTY_SENSOR};
+static const int sensorToIgnorLength = 0;
+
+//DTW or cross-correlation
+static const bool isDTWused = true;
 /* ########################################################################### */
 /* ########################################################################### */
 
@@ -75,24 +78,112 @@ static const int testFileListSize = NUMBER_OF_GESTURES * NUMBER_OF_TEST_PER_GEST
 static std::string preSampledRecordFileList[] = {
 	"test-eat01.json",
 	"test-eat02.json",
+	"test-eat03.json",
+	"test-eat04.json",
+	"test-eat05.json",
+	"test-eat06.json",
+	"test-eat07.json",
+	"test-eat08.json",
+	"test-eat09.json",
+	"test-eat10.json",
 	"test-help01.json",
 	"test-help02.json",
+	"test-help03.json",
+	"test-help04.json",
+	"test-help05.json",
+	"test-help06.json",
+	"test-help07.json",
+	"test-help08.json",
+	"test-help09.json",
+	"test-help10.json",
 	"test-sleep01.json",
 	"test-sleep02.json",
+	"test-sleep03.json",
+	"test-sleep04.json",
+	"test-sleep05.json",
+	"test-sleep06.json",
+	"test-sleep07.json",
+	"test-sleep08.json",
+	"test-sleep09.json",
+	"test-sleep10.json",
 	"test-thankyou01.json",
-	"test-why01.json"
+	"test-thankyou02.json",
+	"test-thankyou03.json",
+	"test-thankyou04.json",
+	"test-thankyou05.json",
+	"test-thankyou06.json",
+	"test-thankyou07.json",
+	"test-thankyou08.json",
+	"test-thankyou09.json",
+	"test-thankyou10.json",
+	"test-why01.json",
+	"test-why02.json",
+	"test-why03.json",
+	"test-why04.json",
+	"test-why05.json",
+	"test-why06.json",
+	"test-why07.json",
+	"test-why08.json",
+	"test-why09.json",
+	"test-why10.json"
 };
 static Gesture preSampledRecordPredictionList[] = {
 	EAT,
 	EAT,
+	EAT,
+	EAT,
+	EAT,
+	EAT,
+	EAT,
+	EAT,
+	EAT,
+	EAT,
 	HELP,
 	HELP,
+	HELP,
+	HELP,
+	HELP,
+	HELP,
+	HELP,
+	HELP,
+	HELP,
+	HELP,
+	SLEEP,
+	SLEEP,
+	SLEEP,
+	SLEEP,
+	SLEEP,
+	SLEEP,
+	SLEEP,
+	SLEEP,
 	SLEEP,
 	SLEEP,
 	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	THANKYOU,
+	WHY,
+	WHY,
+	WHY,
+	WHY,
+	WHY,
+	WHY,
+	WHY,
+	WHY,
+	WHY,
 	WHY
 };
-static const int  preSampledRecordFileListSize = 8;
+static const int  preSampledRecordFileListSize = 50;
+
+// Test success variables
+static int numberOfTestsForGesture[NUMBER_OF_GESTURES];
+static int correctTests[NUMBER_OF_GESTURES];
 
 static const int MAX_R = NUMBER_OF_TEST_PER_GESTURE * sensorToIgnorLength;
 
@@ -100,7 +191,7 @@ void clearScreen();
 double crossCorrelation(int, double*, double*, int);
 
 double calculateEuclideanDistance(double x, double y);
-double CalculateDynamicTimeWarpedDistance(double* t0, double* t1);
+double CalculateDynamicTimeWarpedDistance(double*, double*, int);
 
 void compressAllJsonFiles();
 void compressJsonFile(std::string);
