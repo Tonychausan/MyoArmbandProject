@@ -21,6 +21,8 @@
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
 
+clock_t begin_time;
+
 DataCollector::DataCollector()
 	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose()
 	{
@@ -246,16 +248,22 @@ void DataCollector::gestureRecordOn(){
 	gestureAccCounter = 0;
 	gestureOriCounter = 0;
 
+	begin_time = clock();
+
 	std::cout << "Recording gesture..." << std::endl;
 }
 
 void DataCollector::gestureRecordOff(){
 	std::cout << "gesture recording finished..." << std::endl << std::endl;
 
+	begin_time = clock();
 	Gesture prediction = gestureComparisons(inputGesture);
+	
 
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl;
 	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
+
+	std::cout << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
 
 	isRecording  = false;
 }

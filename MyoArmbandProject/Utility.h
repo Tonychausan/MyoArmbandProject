@@ -21,7 +21,7 @@ static const int NUMBER_OF_SENSORS = 4;
 /* ########################################################################### */
 /* ########################################################################### */
 // List of sensors to ignor in the gesture prediction
-static Sensor sensorToIgnor[] = {ACC,GYR,ORI, EMPTY_SENSOR};
+static Sensor sensorToIgnor[] = {ACC,ORI,GYR, EMPTY_SENSOR};
 static const int sensorToIgnorLength = 0;
 
 //DTW or cross-correlation

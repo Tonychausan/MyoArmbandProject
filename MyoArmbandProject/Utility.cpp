@@ -361,7 +361,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 		}
 	}
 	if (isDTWused){
-		r *= -1;
+		r *= 1;
 	}
 	return r / numberOfArrays;
 }
@@ -369,6 +369,17 @@ double compareArrays(double** in, double** test, Sensor sensor){
 Gesture gestureComparisonsJsonFile(std::string testfile){
 	DataFileHandler gestureInput(testfile);
 	return gestureComparisons(gestureInput);
+}
+
+double maxOfArray(double* a, int size){
+	double max = -DBL_MAX;
+	for (int i = 0; i < NUMBER_OF_GESTURES; i++){
+		if (max < a[i])
+		{
+			max = a[i];
+		}
+	}
+	return max;
 }
 
 Gesture gestureComparisons(DataHandler gestureInput){
@@ -396,18 +407,21 @@ Gesture gestureComparisons(DataHandler gestureInput){
 
 	Gesture prediction = NONE;
 	double r = -DBL_MAX;
+
+	double corr_rs[NUMBER_OF_GESTURES];
+	double emg_comparisons[NUMBER_OF_GESTURES];
+	int numberOfIMUsensors = 0;
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		double corr_r = 0.0;
 		double emg_comparison = 0.0;
-		double largest_corr_r = -DBL_MAX;
-		double largest_emg_comparison = -DBL_MAX;
+		
 		for (int j = 0; j < NUMBER_OF_TEST_PER_GESTURE; j++)
 		{
 			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
 			std::cout << testFilename;
 			DataFileHandler testGesture(testFilename);
-
+			numberOfIMUsensors = 0;
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
 				Sensor sensor = static_cast<Sensor>(k);
@@ -418,22 +432,54 @@ Gesture gestureComparisons(DataHandler gestureInput){
 				}
 				else{
 					corr_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
+					
+					numberOfIMUsensors++;
 				}
 			}
-		
+
+			corr_rs[i] = corr_r;
+			emg_comparisons[i] = emg_comparison;
 			std::cout << '\r';
 			std::cout << "                                                                                                      ";
 			std::cout << '\r';
 
 		}
-		
-		double similarity = corr_r + emg_comparison;
+		if (!isDTWused){
+			double similarity = corr_r + emg_comparison;
 
-		std::cout << gestureToString(static_cast<Gesture>(i)) << ": r = " << similarity << ",\tIMU = " << corr_r << ",\tEMG = " << emg_comparison << std::endl;
-		if (similarity > r)
-		{
-			r = similarity;
-			prediction = static_cast<Gesture>(i);
+			std::cout << gestureToString(static_cast<Gesture>(i)) << ": r = " << similarity << ",\tIMU = " << corr_r << ",\tEMG = " << emg_comparison << std::endl;
+			if (similarity > r)
+			{
+				r = similarity;
+				prediction = static_cast<Gesture>(i);
+			}
+		}
+	}
+
+
+	if (isDTWused){
+		double largest_corr_r = maxOfArray(corr_rs, NUMBER_OF_GESTURES);
+		double largest_emg_comparison = maxOfArray(emg_comparisons, NUMBER_OF_GESTURES);
+
+		for (int i = 0; i < NUMBER_OF_GESTURES; i++){
+			corr_rs[i] = (1 - corr_rs[i]/largest_corr_r) * numberOfIMUsensors;
+			emg_comparisons[i] = 1 - emg_comparisons[i] / largest_emg_comparison;
+
+			if(numberOfIMUsensors == 0){
+				corr_rs[i] = 0;
+			}
+			if (isThisSensorIgnored(EMG)){
+				emg_comparisons[i] = 0;
+			}
+
+			double similarity = corr_rs[i] + emg_comparisons[i];
+
+			std::cout << gestureToString(static_cast<Gesture>(i)) << ": r = " << similarity << ",\tIMU = " << corr_rs[i] << ",\tEMG = " << emg_comparisons[i] << std::endl;
+			if (similarity > r)
+			{
+				r = similarity;
+				prediction = static_cast<Gesture>(i);
+			}
 		}
 	}
 	return prediction;
