@@ -14,6 +14,7 @@
 
 #include "Utility.h"
 
+
 class DataCollector : public myo::DeviceListener {
 private:
 	// These values are set by onArmSync() and onArmUnsync().

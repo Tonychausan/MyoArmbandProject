@@ -30,6 +30,21 @@
     <ClInclude Include="DataCollector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MenuActions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataHandlers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -45,6 +60,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\JsonCpp\dist\jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuActions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataHandlers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

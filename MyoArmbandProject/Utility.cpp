@@ -7,6 +7,9 @@
 #include <json/json.h>
 
 #include "Utility.h"
+#include "DataUtility.h"
+#include "Constants.h"
+#include "SettingsVariables.h"
 
 #define min(a,b) (((a)<(b)) ? (a):(b))
 
@@ -102,8 +105,7 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 double CalculateEuclideanDistance(double x, double y) {
 	return std::sqrt(std::pow((x - y), 2));
 }
-
-double CalculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
+double calculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
 
 	size_t m = size;
 	size_t n = size;
@@ -133,7 +135,6 @@ double CalculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
 
 	return cost[m - 1][n - 1];
 }
-
 double MaxSqrValue(double* array, int n){
 	double max = 0;
 	for (int i = 0; i < n; i++)
@@ -173,7 +174,7 @@ double EmgEnergyCompare(double* x, double* y, int n){
 	if (!isDTWused)
 		return crossCorrelation(intervals / 2, newX, newY, intervals);
 	else
-		return CalculateDynamicTimeWarpedDistance(newX, newY, intervals);
+		return calculateDynamicTimeWarpedDistance(newX, newY, intervals);
 }
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArrays, int numberOfData){
@@ -193,10 +194,10 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArr
 	return dataVec;
 }
 void compressAllJsonFiles(){
-	for (int i = 0; i < testFileListSize; i++){
+	for (int i = 0; i < TRANING_SIZE; i++){
 		compressJsonFile(testFileList[i]);
 	}
-	for (int i = 0; i < preSampledRecordFileListSize; i++){
+	for (int i = 0; i < NUMBER_OF_TESTS; i++){
 		compressJsonFile(preSampledRecordFileList[i]);
 	}
 
@@ -283,14 +284,27 @@ std::string sensorToString(Sensor sensor){
 	}
 }
 
-bool isThisSensorIgnored(Sensor sensor){
-	for (int i = 0; i < sensorToIgnorLength; i++){
-		if (sensor == sensorToIgnor[i]){
-			return true;
-		}
+bool isSensorIgnored(Sensor sensor){
+	switch (sensor){
+	case EMG:
+		return !isEmgSensorOn;
+		break;
+	case ACC:
+		return !isAccSensorOn;
+		break;
+	case GYR:
+		return !isGyrSensorOn;
+		break;
+	case ORI:
+		return !isOriSensorOn;
+		break;
+	default:
+		return false;
 	}
-	return false;
 }
+bool isAllSensorOn(){
+	return  isEmgSensorOn && isAccSensorOn && isOriSensorOn && isGyrSensorOn;
+};
 
 void setDataLengt(int &dataLength, Sensor sensor){
 	switch (sensor){
@@ -356,7 +370,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 			if (!isDTWused)
 				r += crossCorrelation(dataLength / 2, in[i], test[i], dataLength);
 			else{
-				r += CalculateDynamicTimeWarpedDistance(in[i], test[i], dataLength);
+				r += calculateDynamicTimeWarpedDistance(in[i], test[i], dataLength);
 			}
 		}
 	}
@@ -383,18 +397,18 @@ double maxOfArray(double* a, int size){
 }
 
 Gesture gestureComparisons(DataHandler gestureInput){
-	if (sensorToIgnorLength > 0)
+	if (!isAllSensorOn())
 	{
 		std::cout << "Sensor ignored: ";
-		Sensor sensor = sensorToIgnor[0];
-		std::cout << sensorToString(sensor);
-		for (int k = 1; k < sensorToIgnorLength; k++)
+		for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 		{
-			sensor = sensorToIgnor[k];
-			std::cout << ", " << sensorToString(sensor);
+			Sensor sensor = (Sensor) k;
+			if (isSensorIgnored(sensor))
+			{
+				std::cout << sensorToString(sensor) << ", ";
+			}
 		}
-
-		std::cout << std::endl;
+		std::cout << "\b\b" << "  " << std::endl;
 	}
 
 	std::cout << "Comparison method: ";
@@ -416,16 +430,16 @@ Gesture gestureComparisons(DataHandler gestureInput){
 		double corr_r = 0.0;
 		double emg_comparison = 0.0;
 		
-		for (int j = 0; j < NUMBER_OF_TEST_PER_GESTURE; j++)
+		for (int j = 0; j < NUMBER_OF_TRANING_PER_GESTURE; j++)
 		{
-			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TEST_PER_GESTURE + j);
+			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
 			std::cout << testFilename;
 			DataFileHandler testGesture(testFilename);
 			numberOfIMUsensors = 0;
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
 				Sensor sensor = static_cast<Sensor>(k);
-				if (isThisSensorIgnored(sensor))
+				if (isSensorIgnored(sensor))
 					continue;
 				else if (sensor == EMG){
 					emg_comparison += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
@@ -468,7 +482,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 			if(numberOfIMUsensors == 0){
 				corr_rs[i] = 0;
 			}
-			if (isThisSensorIgnored(EMG)){
+			if (isSensorIgnored(EMG)){
 				emg_comparisons[i] = 0;
 			}
 
@@ -485,141 +499,3 @@ Gesture gestureComparisons(DataHandler gestureInput){
 	return prediction;
 }
 
-DataHandler::DataHandler(){
-
-};
-
-DataFileHandler::DataFileHandler(std::string name)
-	:DataHandler()
-{
-	filename = "data/";
-	filename.append(name);
-
-	generateDataArrays();
-}
-
-
-void DataFileHandler::generateSensorDataArray(Json::Value obj, Sensor sensor){
-	const Json::Value& jsonObject = obj[getJsonArrayNameBySensor(sensor)];
-	const Json::Value& data = jsonObject["data"];
-
-	int numberOfArrays, dataLength;
-
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
-
-	double **workArrays = new double*[numberOfArrays];
-	for (int i = 0; i < numberOfArrays; i++)
-	{
-		workArrays[i] = new double[dataLength];
-		for (int j = 0; j < dataLength; j++)
-		{
-			workArrays[i][j] = data[j][i].asDouble();
-		}
-	}
-
-	setSensorArray(workArrays, sensor);
-}
-
-void DataFileHandler::generateDataArrays(){
-	std::ifstream ifs(filename);
-	Json::Reader reader;
-	Json::Value obj;
-	reader.parse(ifs, obj);
-
-	for (int k = 0; k < NUMBER_OF_SENSORS; k++)
-	{
-		Sensor sensor = static_cast<Sensor>(k);
-		generateSensorDataArray(obj, sensor);
-	}
-}
-
-void DataHandler::setSensorArray(double** array, Sensor sensor){
-	switch (sensor){
-	case EMG:
-		emgArrays = array;
-		break;
-	case ACC:
-		accArrays = array;
-		break;
-	case GYR:
-		gyrArrays = array;
-		break;
-	case ORI:
-		oriArrays = array;
-		break;
-	}
-}
-
-double** DataHandler::getWorkingArrays(Sensor sensor){
-	double **workArrays;
-	switch (sensor){
-	case EMG:
-		workArrays = emgArrays;
-		break;
-	case ACC:
-		workArrays = accArrays;
-		break;
-	case GYR:
-		workArrays = gyrArrays;
-		break;
-	default: //ORI
-		workArrays = oriArrays;
-		break;
-	}
-	return workArrays;
-}
-
-double** DataHandler::getArrays(Sensor sensor){
-	switch (sensor){
-	case EMG:
-		return emgArrays;
-	case ACC:
-		return gyrArrays;
-	case GYR:
-		return accArrays;
-	case ORI:
-		return oriArrays;
-	default:
-		return NULL;
-	}
-}
-
-DataInputHandler::DataInputHandler(){
-	for (int k = 0; k < NUMBER_OF_SENSORS; k++)
-	{
-		Sensor sensor = static_cast<Sensor>(k);
-		generateSensorArrays(sensor);
-	}
-}
-
-void DataInputHandler::generateSensorArrays(Sensor sensor){
-	int numberOfArrays, dataLength;
-
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
-
-	double **workArrays = new double*[numberOfArrays];
-	for (int i = 0; i < numberOfArrays; i++)
-	{
-		workArrays[i] = new double[dataLength];
-	}
-
-	setSensorArray(workArrays, sensor);
-}
-
-void DataInputHandler::setSensorArrayValueAt(int i, int j, double value, Sensor sensor){
-	int numberOfArrays, dataLength;
-
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
-
-	if (j > numberOfArrays || i > dataLength)
-	{
-		std::cout << sensorToString(sensor) << ": Out of bound in setSensorArrayValueAt!! ("<< i << "," << j << ")" << std::endl;
-		return;
-	}
-
-	double **workArrays = getWorkingArrays(sensor);
-	workArrays[j][i] = value;
-}
