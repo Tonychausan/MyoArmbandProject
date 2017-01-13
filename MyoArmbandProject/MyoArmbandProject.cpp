@@ -98,8 +98,8 @@ void keyboardInterruptDetector()
 void initTest(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
-		correctTests[i] = 0;
-		numberOfTestsForGesture[i] = 0;
+		number_of_correct_recognition[i] = 0;
+		number_of_tests_for_gesture[i] = 0;
 	}
 }
 

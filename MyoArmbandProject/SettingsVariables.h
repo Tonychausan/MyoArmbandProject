@@ -8,7 +8,7 @@ static const bool isGyrSensorOn = true;
 static const bool isOriSensorOn = true;
 
 //DTW or cross-correlation
-static const bool isDTWused = false;
+static const bool isDtwUsed = false;
 
 
 

@@ -11,7 +11,7 @@ enum Gesture{ EAT, HELP, SLEEP, THANKYOU, WHY, NONE };
 static const int NUMBER_OF_GESTURES = 5;
 
 // List of pre-sample files
-static std::string testFileList[] = {
+static std::string test_file_list[] = {
 	"eat01.json",
 	"eat02.json",
 	"eat03.json",
@@ -84,7 +84,7 @@ static std::string preSampledRecordFileList[] = {
 	"test-why09.json",
 	"test-why10.json"
 };
-static Gesture preSampledRecordPredictionList[] = {
+static Gesture presampled_definitives_list[] = {
 	EAT,
 	EAT,
 	EAT,

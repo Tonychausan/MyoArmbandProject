@@ -11,35 +11,35 @@ void testFile(std::string filename, Gesture gesture){
 	std::cout << std::endl << "Gesture: " << gestureToString(gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
 
-	numberOfTestsForGesture[gesture] += 1;
+	number_of_tests_for_gesture[gesture] += 1;
 	if (prediction == gesture)
 	{
-		correctTests[gesture] += 1;
+		number_of_correct_recognition[gesture] += 1;
 	}
 }
 
 void preDataTest(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
-		correctTests[i] = 0;
-		numberOfTestsForGesture[i] = 0;
+		number_of_correct_recognition[i] = 0;
+		number_of_tests_for_gesture[i] = 0;
 	}
 
 	for (int i = 0; i < NUMBER_OF_TESTS; i++)
 	{
-		testFile(preSampledRecordFileList[i], preSampledRecordPredictionList[i]);
+		testFile(preSampledRecordFileList[i], presampled_definitives_list[i]);
 	}
 
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
-		std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << correctTests[i] << " of " << numberOfTestsForGesture[i] << std::endl;
+		std::cout << gestureToString(static_cast<Gesture>(i)) << ": " << number_of_correct_recognition[i] << " of " << number_of_tests_for_gesture[i] << std::endl;
 	}
 
 	system("PAUSE");
 }
 
 void compressFiles(){
-	compressAllJsonFiles();
+	compressAllFiles();
 	std::cin.ignore();
 	clearScreen();
 }

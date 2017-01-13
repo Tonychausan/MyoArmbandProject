@@ -102,7 +102,7 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 	return r;
 }
 
-double CalculateEuclideanDistance(double x, double y) {
+double calculateEuclideanDistance(double x, double y) {
 	return std::sqrt(std::pow((x - y), 2));
 }
 double calculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
@@ -113,29 +113,29 @@ double calculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
 	// Allocate the Matrix to work on:
 	std::vector<std::vector<double>> cost(m, std::vector<double>(n));
 
-	cost[0][0] = CalculateEuclideanDistance(t0[0] - t0[0], t1[0] - t1[0]);
+	cost[0][0] = calculateEuclideanDistance(t0[0] - t0[0], t1[0] - t1[0]);
 
 	// Calculate the first row:
 	for (int i = 1; i < m; i++) {
-		cost[i][0] = cost[i - 1][0] + CalculateEuclideanDistance(t0[i] - t0[0], t1[0] - t1[0]);
+		cost[i][0] = cost[i - 1][0] + calculateEuclideanDistance(t0[i] - t0[0], t1[0] - t1[0]);
 	}
 
 	// Calculate the first column:
 	for (int j = 1; j < n; j++) {
-		cost[0][j] = cost[0][j - 1] + CalculateEuclideanDistance(t0[0] - t0[0], t1[j] - t1[0]);
+		cost[0][j] = cost[0][j - 1] + calculateEuclideanDistance(t0[0] - t0[0], t1[j] - t1[0]);
 	}
 
 	// Fill the matrix:
 	for (int i = 1; i < m; i++) {
 		for (int j = 1; j < n; j++) {
 			cost[i][j] = min(cost[i - 1][j], min(cost[i][j - 1], cost[i - 1][j - 1]))
-				+ CalculateEuclideanDistance(t0[i], t1[j]);
+				+ calculateEuclideanDistance(t0[i], t1[j]);
 		}
 	}
 
 	return cost[m - 1][n - 1];
 }
-double MaxSqrValue(double* array, int n){
+double maxSqrValue(double* array, int n){
 	double max = 0;
 	for (int i = 0; i < n; i++)
 	{
@@ -148,44 +148,44 @@ double MaxSqrValue(double* array, int n){
 }
 
 // x is in, y is test
-double EmgEnergyCompare(double* x, double* y, int n){
-	double xMaxSqrValue = MaxSqrValue(x, n);
-	double yMaxSqrValue = MaxSqrValue(y, n);
+double emgEnergyCompare(double* x, double* y, int n){
+	double x_max_sqr_value = maxSqrValue(x, n);
+	double y_max_sqr_value = maxSqrValue(y, n);
 
 	int intervals = 50;
-	int sizeOfIntervals = n/intervals;
+	int size_of_intervals = n/intervals;
 	
-	double* newX = new double[intervals];
-	double* newY = new double[intervals];
+	double* new_x = new double[intervals];
+	double* new_y = new double[intervals];
 
 	for (int i = 0; i < intervals; i++){
-		double partSumX = 0.0;
-		double partSumY = 0.0;
+		double part_sum_x = 0.0;
+		double part_sum_y = 0.0;
 		
-		for (int j = 0; j < sizeOfIntervals; ++j)
+		for (int j = 0; j < size_of_intervals; ++j)
 		{
-			partSumX += pow(x[i*sizeOfIntervals + j], 2) / xMaxSqrValue;
-			partSumY += pow(y[i*sizeOfIntervals + j], 2) / yMaxSqrValue;
+			part_sum_x += pow(x[i*size_of_intervals + j], 2) / x_max_sqr_value;
+			part_sum_y += pow(y[i*size_of_intervals + j], 2) / y_max_sqr_value;
 		}
-		newX[i] = partSumX;
-		newY[i] = partSumY;
+		new_x[i] = part_sum_x;
+		new_y[i] = part_sum_y;
 	}
 
-	if (!isDTWused)
-		return crossCorrelation(intervals / 2, newX, newY, intervals);
+	if (!isDtwUsed)
+		return crossCorrelation(intervals / 2, new_x, new_y, intervals);
 	else
-		return calculateDynamicTimeWarpedDistance(newX, newY, intervals);
+		return calculateDynamicTimeWarpedDistance(new_x, new_y, intervals);
 }
 
-Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArrays, int numberOfData){
+Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_arrays, int number_of_data){
 	const Json::Value& dataType = obj[dataname];
 	const Json::Value& data = dataType["data"];
 
 	Json::Value dataVec(Json::arrayValue);
-	for (int j = 0; j < numberOfData; j++)
+	for (int j = 0; j < number_of_data; j++)
 	{
 		Json::Value tempArray(Json::arrayValue);
-		for (int i = 0; i < numberOfArrays; i++)
+		for (int i = 0; i < number_of_arrays; i++)
 		{
 			tempArray.append(Json::Value(data[j][i]));
 		}
@@ -193,17 +193,17 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int numberOfArr
 	}
 	return dataVec;
 }
-void compressAllJsonFiles(){
+void compressAllFiles(){
 	for (int i = 0; i < TRANING_SIZE; i++){
-		compressJsonFile(testFileList[i]);
+		compressFile(test_file_list[i]);
 	}
 	for (int i = 0; i < NUMBER_OF_TESTS; i++){
-		compressJsonFile(preSampledRecordFileList[i]);
+		compressFile(preSampledRecordFileList[i]);
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
 }
-void compressJsonFile(std::string name){
+void compressFile(std::string name){
 	std::string inFilename  = "data/";
 	inFilename.append(name);
 
@@ -232,7 +232,7 @@ void compressJsonFile(std::string name){
 	//file_id.close();
 }
 std::string getCompressedFilename(int i){
-	return getCompressedFilename(testFileList[i]);
+	return getCompressedFilename(test_file_list[i]);
 }
 
 std::string getCompressedFilename(std::string filename){
@@ -306,36 +306,36 @@ bool isAllSensorOn(){
 	return  isEmgSensorOn && isAccSensorOn && isOriSensorOn && isGyrSensorOn;
 };
 
-void setDataLengt(int &dataLength, Sensor sensor){
+void setDataLengt(int &data_length, Sensor sensor){
 	switch (sensor){
 	case EMG:
-		dataLength = DATA_EMG_LENGTH;
+		data_length = DATA_EMG_LENGTH;
 		break;
 	case ACC:
-		dataLength = DATA_ACC_LENGTH;
+		data_length = DATA_ACC_LENGTH;
 		break;
 	case GYR:
-		dataLength = DATA_GYR_LENGTH;
+		data_length = DATA_GYR_LENGTH;
 		break;
 	case ORI:
-		dataLength = DATA_ORI_LENGTH;
+		data_length = DATA_ORI_LENGTH;
 		break;
 	}
 };
 
-void setNumberOfArrays(int &numberOfArrays, Sensor sensor){
+void setNumberOfArrays(int &number_of_arrays, Sensor sensor){
 	switch (sensor){
 	case EMG:
-		numberOfArrays = NUMBER_OF_EMG_ARRAYS;
+		number_of_arrays = NUMBER_OF_EMG_ARRAYS;
 		break;
 	case ACC:
-		numberOfArrays = NUMBER_OF_ACC_ARRAYS;
+		number_of_arrays = NUMBER_OF_ACC_ARRAYS;
 		break;
 	case GYR:
-		numberOfArrays = NUMBER_OF_GYR_ARRAYS;
+		number_of_arrays = NUMBER_OF_GYR_ARRAYS;
 		break;
 	case ORI:
-		numberOfArrays = NUMBER_OF_ORI_ARRAYS;
+		number_of_arrays = NUMBER_OF_ORI_ARRAYS;
 		break;
 	}
 };
@@ -355,29 +355,29 @@ std::string getJsonArrayNameBySensor(Sensor sensor){
 }
 
 double compareArrays(double** in, double** test, Sensor sensor){
-	int numberOfArrays, dataLength;
+	int number_of_arrays, data_length;
 
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
+	setNumberOfArrays(number_of_arrays, sensor);
+	setDataLengt(data_length, sensor);
 	
 	double r = 0;
-	for (int i = 0; i < numberOfArrays; i++)
+	for (int i = 0; i < number_of_arrays; i++)
 	{
 		if (sensor == EMG){
-			r += EmgEnergyCompare(in[i], test[i], dataLength);
+			r += emgEnergyCompare(in[i], test[i], data_length);
 		}
 		else{
-			if (!isDTWused)
-				r += crossCorrelation(dataLength / 2, in[i], test[i], dataLength);
+			if (!isDtwUsed)
+				r += crossCorrelation(data_length / 2, in[i], test[i], data_length);
 			else{
-				r += calculateDynamicTimeWarpedDistance(in[i], test[i], dataLength);
+				r += calculateDynamicTimeWarpedDistance(in[i], test[i], data_length);
 			}
 		}
 	}
-	if (isDTWused){
+	if (isDtwUsed){
 		r *= 1;
 	}
-	return r / numberOfArrays;
+	return r / number_of_arrays;
 }
 
 Gesture gestureComparisonsJsonFile(std::string testfile){
@@ -412,7 +412,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 	}
 
 	std::cout << "Comparison method: ";
-	if(isDTWused)
+	if(isDtwUsed)
 		std::cout << "Dynamic Time Warping";
 	else
 		std::cout << "Cross-correlation";
@@ -424,7 +424,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 
 	double corr_rs[NUMBER_OF_GESTURES];
 	double emg_comparisons[NUMBER_OF_GESTURES];
-	int numberOfIMUsensors = 0;
+	int number_of_IMU_sensors = 0;
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		double corr_r = 0.0;
@@ -432,10 +432,10 @@ Gesture gestureComparisons(DataHandler gestureInput){
 		
 		for (int j = 0; j < NUMBER_OF_TRANING_PER_GESTURE; j++)
 		{
-			std::string testFilename = getCompressedFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
-			std::cout << testFilename;
-			DataFileHandler testGesture(testFilename);
-			numberOfIMUsensors = 0;
+			std::string test_filename = getCompressedFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
+			std::cout << test_filename;
+			DataFileHandler testGesture(test_filename);
+			number_of_IMU_sensors = 0;
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
 				Sensor sensor = static_cast<Sensor>(k);
@@ -447,7 +447,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 				else{
 					corr_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
 					
-					numberOfIMUsensors++;
+					number_of_IMU_sensors++;
 				}
 			}
 
@@ -458,7 +458,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 			std::cout << '\r';
 
 		}
-		if (!isDTWused){
+		if (!isDtwUsed){
 			double similarity = corr_r + emg_comparison;
 
 			std::cout << gestureToString(static_cast<Gesture>(i)) << ": r = " << similarity << ",\tIMU = " << corr_r << ",\tEMG = " << emg_comparison << std::endl;
@@ -471,15 +471,15 @@ Gesture gestureComparisons(DataHandler gestureInput){
 	}
 
 
-	if (isDTWused){
+	if (isDtwUsed){
 		double largest_corr_r = maxOfArray(corr_rs, NUMBER_OF_GESTURES);
 		double largest_emg_comparison = maxOfArray(emg_comparisons, NUMBER_OF_GESTURES);
 
 		for (int i = 0; i < NUMBER_OF_GESTURES; i++){
-			corr_rs[i] = (1 - corr_rs[i]/largest_corr_r) * numberOfIMUsensors;
+			corr_rs[i] = (1 - corr_rs[i]/largest_corr_r) * number_of_IMU_sensors;
 			emg_comparisons[i] = 1 - emg_comparisons[i] / largest_emg_comparison;
 
-			if(numberOfIMUsensors == 0){
+			if(number_of_IMU_sensors == 0){
 				corr_rs[i] = 0;
 			}
 			if (isSensorIgnored(EMG)){

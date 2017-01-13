@@ -15,15 +15,15 @@ static int counter = 20; //frequency counter
 static time_t start;
 
 // Test success variables
-static int numberOfTestsForGesture[NUMBER_OF_GESTURES];
-static int correctTests[NUMBER_OF_GESTURES];
+static int number_of_tests_for_gesture[NUMBER_OF_GESTURES];
+static int number_of_correct_recognition[NUMBER_OF_GESTURES];
 
 void clearScreen();
 double crossCorrelation(int, double*, double*, int);
 double calculateDynamicTimeWarpedDistance(double*, double*, int);
 
-void compressAllJsonFiles();
-void compressJsonFile(std::string);
+void compressAllFiles();
+void compressFile(std::string);
 std::string getCompressedFilename(std::string);
 
 bool isSensorIgnored(Sensor);
