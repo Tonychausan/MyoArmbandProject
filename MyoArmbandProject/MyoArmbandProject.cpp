@@ -99,7 +99,7 @@ void initTest(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		number_of_correct_recognition[i] = 0;
-		number_of_tests_for_gesture[i] = 0;
+		number_of_tests[i] = 0;
 	}
 }
 
@@ -159,7 +159,6 @@ START_MENU:
 					isProgramRunning = true;
 					std::cout << RECORD_PRESTART_MESSEGE << std::endl;
 					std::thread keyboardInterrupt(keyboardInterruptDetector);
-
 
 					while (isProgramRunning){
 						if (isRecording){

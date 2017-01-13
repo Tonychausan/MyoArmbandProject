@@ -24,18 +24,17 @@ private:
 	// This is set by onUnlocked() and onLocked().
 	bool isUnlocked;
 
-	// These values are set by onOrientationData() and onPose().
+	// These values are set by onOrientationData()
 	int roll_w, pitch_w, yaw_w;
-	myo::Pose currentPose;
 
 	// The values of this array is set by onEmgData().
-	std::array<int8_t, 8> emgSamples;
+	std::array<int8_t, 8> emg_data;
 
 	// The values of this array is set by ononAccelerometerData().
-	myo::Vector3<float> accelerometerData;
+	myo::Vector3<float> acc_data;
 
 	// The values of this array is set by onGyroscopeData().
-	myo::Vector3<float> gyroData;
+	myo::Vector3<float> gyr_data;
 
 	bool isRecording;
 
@@ -45,16 +44,14 @@ private:
 	bool isAccRecording;
 
 	// Counter for number of measurment for each gesture
-	int gestureEmgCounter;
-	int gestureGyrCounter;
-	int gestureAccCounter;
-	int gestureOriCounter;
+	int emg_sampling_counter;
+	int gyr_sampling_counter;
+	int acc_sampling_counter;
+	int ori_sampling_counter;
 
 
-	int inputgestureEmgCounter;
-	DataInputHandler inputGesture;
-
-
+	int input_gesture_EMG_counter;
+	DataInputHandler input_gesture;
 
 public:
 	DataCollector();
@@ -65,8 +62,6 @@ public:
 	void onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, const myo::Vector3<float> &accel);
 	void onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3< float > & gyro);
 	void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg);
-	
-	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose);
 	
 	void onArmSync(myo::Myo* myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation, myo::WarmupState warmupState);
 	void onArmUnsync(myo::Myo* myo, uint64_t timestamp);
@@ -91,7 +86,7 @@ public:
 	template <typename DataArray>
 	void recorder(Sensor, DataArray);
 
-	void setInputGestureAt(int, int, double, Sensor);
+	void setInputGestureSensorArrayValueAt(int, int, double, Sensor);
 
 };
 

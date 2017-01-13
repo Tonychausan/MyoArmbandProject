@@ -11,30 +11,93 @@
 
 volatile static bool isProgramRunning = true;
 
-static int counter = 20; //frequency counter
 static time_t start;
 
 // Test success variables
-static int number_of_tests_for_gesture[NUMBER_OF_GESTURES];
+static int number_of_tests[NUMBER_OF_GESTURES];
 static int number_of_correct_recognition[NUMBER_OF_GESTURES];
 
+
+/*
+* Function: clearScreen
+* ----------------------------
+*   Clear the terminal window on Windows
+*/
 void clearScreen();
-double crossCorrelation(int, double*, double*, int);
-double calculateDynamicTimeWarpedDistance(double*, double*, int);
 
+/*
+* Function: crossCorrelation
+* ----------------------------
+*   Returns the square of the largest of its two input values
+*	http://paulbourke.net/miscellaneous/correlate/
+*
+*	maxdelay: the maxium delay for comparision
+*   input_array: input array
+*   test_array: test array from training set
+*	size_of_array: the data size
+*
+*   returns: the correlation of input_array and test_array using cross correlation
+*/
+double crossCorrelation(int maxdelay, double* input_array, double* test_array, int size_of_array);
+
+
+/*
+* Function: calculateDynamicTimeWarpedDistance
+* ----------------------------
+*   Returns the square of the largest of its two input values
+*
+*	maxdelay: the maxium delay for comparision
+*   input_array: input array
+*   test_array: test array from training set
+*	size_of_array: the data size
+*
+*   returns: the distance of input_array and test_array using DTW
+*/
+double calculateDynamicTimeWarpedDistance(double* input_array, double* test_array, int size_of_array);
+
+/*
+* Function: compressAllFiles
+* ----------------------------
+*   Compress all the raw json files from pwter 
+*/
+/*
+* Function: compressFile
+* ----------------------------
+*   Compress json-file filename
+*
+*	filename: filename of input file
+*/
+/*
+* Function: getCompressedFilename
+* ----------------------------
+*   Returns the compressed-filename of filename
+*
+*	filename: raw filename
+*
+*   returns: compressed filename
+*/
 void compressAllFiles();
-void compressFile(std::string);
-std::string getCompressedFilename(std::string);
+void compressFile(std::string filename);
+std::string getCompressedFilename(std::string filename);
 
-bool isSensorIgnored(Sensor);
+/*
+*Function: isSensorIgnored
+* ----------------------------
+*   Check if given sensor is ignored by the system
+*
+*	sensor : sensor to check
+*
+*   returns : true if sensor is ignored, else false
+*/
+bool isSensorIgnored(Sensor sensor);
 
-std::string gestureToString(Gesture);
-std::string sensorToString(Sensor);
 
-Gesture gestureComparisonsJsonFile(std::string);
 
-void setDataLengt(int&, Sensor);
-void setNumberOfArrays(int&, Sensor);
+
+Gesture gestureComparisonsJsonFile(std::string testfilename);
+
+void setDataLengt(int& data_length, Sensor sensor);
+void setNumberOfArrays(int& number_of_arrays, Sensor sensor);
 
 Gesture gestureComparisons(DataHandler);
 

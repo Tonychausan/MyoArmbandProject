@@ -5,10 +5,41 @@
 
 // List of sensors
 enum Sensor{ EMG, ACC, ORI, GYR, EMPTY_SENSOR };
+static std::string sensor_names[] = { "Emg", "Acc", "Ori", "Gyr" };
 
 // List of pre-sampled gestures
 enum Gesture{ EAT, HELP, SLEEP, THANKYOU, WHY, NONE };
+static std::string gesture_names[] = { "EAT", "HELP", "SLEEP", "THANKYOU", "WHY" };
 static const int NUMBER_OF_GESTURES = 5;
+
+/*
+*Function: gestureToString
+* ----------------------------
+*	gesture : gesture
+*
+*   returns : gesture name
+*/
+/*
+*Function: sensorToString
+* ----------------------------
+*	sensor : sensor
+*
+*   returns : sensor name
+*/
+std::string gestureToString(Gesture gesture);
+std::string sensorToString(Sensor sensor);
+
+/*
+*Function: isSensorIgnored
+* ----------------------------
+*   Check if given sensor is ignored by the system
+*
+*	sensor : sensor to check
+*
+*   returns : true if sensor is ignored, else false
+*/
+bool isSensorIgnored(Sensor sensor);
+
 
 // List of pre-sample files
 static std::string test_file_list[] = {
@@ -32,7 +63,7 @@ static const int NUMBER_OF_TRANING_PER_GESTURE = 3; // pre-samples per gesture
 static const int TRANING_SIZE = NUMBER_OF_GESTURES * NUMBER_OF_TRANING_PER_GESTURE;
 
 
-static std::string preSampledRecordFileList[] = {
+static std::string presampled_test_filename_list[] = {
 	"test-eat01.json",
 	"test-eat02.json",
 	"test-eat03.json",

@@ -13,6 +13,8 @@
 
 #define min(a,b) (((a)<(b)) ? (a):(b))
 
+
+
 void clearScreen()
 {
 	HANDLE                     hStdOut;
@@ -50,8 +52,7 @@ void clearScreen()
 	SetConsoleCursorPosition(hStdOut, homeCoords);
 }
 
-// http://paulbourke.net/miscellaneous/correlate/
-double crossCorrelation(int maxdelay, double* x, double* y, int n){
+double crossCorrelation(int maxdelay, double* x, double* y, int size_of_array){
 	// first values
 	double xFirst = x[0];
 	double yFirst = y[0];
@@ -61,17 +62,17 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 	/* Calculate the mean of the two series x[], y[] */
 	mx = 0;
 	my = 0;
-	for (i=0; i<n; i++) {
+	for (i=0; i<size_of_array; i++) {
 		mx += x[i] - xFirst;
 		my += y[i] - yFirst;
 	}
-	mx /= n;
-	my /= n;
+	mx /= size_of_array;
+	my /= size_of_array;
 
 	/* Calculate the denominator */
 	sx = 0;
 	sy = 0;
-	for (i = 0; i<n; i++) {
+	for (i = 0; i<size_of_array; i++) {
 		sx += (x[i] - xFirst - mx) * (x[i] - xFirst - mx);
 		sy += (y[i] - yFirst - my) * (y[i] - yFirst - my);
 	}
@@ -82,9 +83,9 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 	int d = -maxdelay;
 	for (int delay = -maxdelay; delay < maxdelay; delay++) {
 		sxy = 0;
-		for (i = 0; i<n; i++) {
+		for (i = 0; i<size_of_array; i++) {
 			j = i + delay;
-			if (j < 0 || j >= n)
+			if (j < 0 || j >= size_of_array)
 				continue;
 			else
 				sxy += (x[i] - xFirst - mx) * (y[j] - yFirst - my);
@@ -105,10 +106,10 @@ double crossCorrelation(int maxdelay, double* x, double* y, int n){
 double calculateEuclideanDistance(double x, double y) {
 	return std::sqrt(std::pow((x - y), 2));
 }
-double calculateDynamicTimeWarpedDistance(double* t0, double* t1, int size) {
+double calculateDynamicTimeWarpedDistance(double* t0, double* t1, int size_of_array) {
 
-	size_t m = size;
-	size_t n = size;
+	size_t m = size_of_array;
+	size_t n = size_of_array;
 
 	// Allocate the Matrix to work on:
 	std::vector<std::vector<double>> cost(m, std::vector<double>(n));
@@ -177,6 +178,7 @@ double emgEnergyCompare(double* x, double* y, int n){
 		return calculateDynamicTimeWarpedDistance(new_x, new_y, intervals);
 }
 
+
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_arrays, int number_of_data){
 	const Json::Value& dataType = obj[dataname];
 	const Json::Value& data = dataType["data"];
@@ -198,16 +200,16 @@ void compressAllFiles(){
 		compressFile(test_file_list[i]);
 	}
 	for (int i = 0; i < NUMBER_OF_TESTS; i++){
-		compressFile(preSampledRecordFileList[i]);
+		compressFile(presampled_test_filename_list[i]);
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
 }
-void compressFile(std::string name){
-	std::string inFilename  = "data/";
-	inFilename.append(name);
+void compressFile(std::string filename){
+	std::string input_filename  = "data/";
+	input_filename.append(filename);
 
-	std::ifstream ifs(inFilename);
+	std::ifstream ifs(input_filename);
 	Json::Reader reader;
 	Json::Value obj;
 	reader.parse(ifs, obj);
@@ -220,16 +222,16 @@ void compressFile(std::string name){
 	event["ori"]["data"] = jsonDataArray("ori", obj, NUMBER_OF_ORI_ARRAYS, DATA_ORI_LENGTH);
 
 	std::ofstream file_id;
-	std::string outFilename = "data/";
-	outFilename.append("compressed-");
-	outFilename.append(name);
-	std::cout << outFilename << std::endl;
-	file_id.open(outFilename);
+	std::string output_filename = "data/";
+	output_filename.append("compressed-");
+	output_filename.append(filename);
+	std::cout << output_filename << std::endl;
+	file_id.open(output_filename);
 
-	Json::StyledWriter styledWriter;
-	file_id << styledWriter.write(event);
+	Json::StyledWriter styled_writer;
+	file_id << styled_writer.write(event);
 
-	//file_id.close();
+	file_id.close();
 }
 std::string getCompressedFilename(int i){
 	return getCompressedFilename(test_file_list[i]);
@@ -241,48 +243,6 @@ std::string getCompressedFilename(std::string filename){
 	return name;
 }
 
-std::string gestureToString(Gesture gesture){
-	switch (gesture){
-	case EAT:
-		return "EAT";
-		break;
-	case HELP:
-		return "HELP";
-		break;
-	case SLEEP:
-		return "SLEEP";
-		break;
-	case THANKYOU:
-		return "THANKYOU";
-		break;
-	case WHY:
-		return "WHY";
-		break;
-
-	default:
-		return "";
-		break;
-	}
-}
-
-std::string sensorToString(Sensor sensor){
-	switch (sensor){
-	case EMG:
-		return "Emg";
-		break;
-	case ACC:
-		return "Acc";
-		break;
-	case GYR:
-		return "Gyr";
-		break;
-	case ORI:
-		return "Ori";
-		break;
-	default:
-		return "";
-	}
-}
 
 bool isSensorIgnored(Sensor sensor){
 	switch (sensor){
@@ -374,14 +334,11 @@ double compareArrays(double** in, double** test, Sensor sensor){
 			}
 		}
 	}
-	if (isDtwUsed){
-		r *= 1;
-	}
 	return r / number_of_arrays;
 }
 
-Gesture gestureComparisonsJsonFile(std::string testfile){
-	DataFileHandler gestureInput(testfile);
+Gesture gestureComparisonsJsonFile(std::string test_filename){
+	DataFileHandler gestureInput(test_filename);
 	return gestureComparisons(gestureInput);
 }
 

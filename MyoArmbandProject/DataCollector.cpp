@@ -26,7 +26,7 @@
 clock_t begin_time;
 
 DataCollector::DataCollector()
-	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose()
+	: onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0)
 	{
 		isRecording = false;
 
@@ -35,10 +35,10 @@ DataCollector::DataCollector()
 		isOriRecording = false;
 		isAccRecording = false;
 
-		gestureEmgCounter = 0;
-		gestureGyrCounter = 0;
-		gestureAccCounter = 0;
-		gestureOriCounter = 0;
+		emg_sampling_counter = 0;
+		gyr_sampling_counter = 0;
+		acc_sampling_counter = 0;
+		ori_sampling_counter = 0;
 	}
 
 // onUnpair() is called whenever the Myo is disconnected from Myo Connect by the user.
@@ -51,7 +51,7 @@ void DataCollector::onUnpair(myo::Myo* myo, uint64_t timestamp)
 	yaw_w = 0;
 	onArm = false;
 	isUnlocked = false;
-	emgSamples.fill(0);
+	emg_data.fill(0);
 }
 
 // onOrientationData() is called whenever the Myo device provides its current orientation, which is represented
@@ -82,7 +82,7 @@ void DataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const m
 }
 
 void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, const myo::Vector3<float> &accel){
-	accelerometerData = accel;
+	acc_data = accel;
 
 	// Recorder for Accelerometer Data
 	recorder(ACC, accel);
@@ -90,7 +90,7 @@ void DataCollector::onAccelerometerData(myo::Myo* 	myo, uint64_t 	timestamp, con
 
 void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3< float > & gyro)
 {
-	gyroData = gyro;
+	gyr_data = gyro;
 
 	// Recorder for Gyroscope Data
 	recorder(GYR, gyro);
@@ -100,43 +100,22 @@ void DataCollector::onGyroscopeData(myo::Myo* myo, uint64_t timestamp, const myo
 void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
 	for (int i = 0; i < NUMBER_OF_EMG_ARRAYS; i++) {
-		emgSamples[i] = emg[i];
+		emg_data[i] = emg[i];
 	}
 
 	// Recorder for EMG Data
 	recorder(EMG, emg);
 
-	// Turn off recording if all the sensors are finished, using highest frequency sensor
-	if (isRecording && gestureEmgCounter % (DATA_EMG_LENGTH/10) == 0)
+	// Recording indicator
+	if (isRecording && emg_sampling_counter % (DATA_EMG_LENGTH/10) == 0)
 	{
 		std::cout << ".";
 	}
 
+	// Turn off recording if all the sensors are finished, using highest frequency sensor
 	if (isRecording && !isRecordingFinished()){
 		std::cout << std::endl;
 		gestureRecordOff();
-	}
-}
-
-// onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
-// making a fist, or not making a fist anymore.
-void DataCollector::onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose)
-{
-	currentPose = pose;
-
-	if (pose != myo::Pose::unknown && pose != myo::Pose::rest) {
-		// Tell the Myo to stay unlocked until told otherwise. We do that here so you can hold the poses without the
-		// Myo becoming locked.
-		myo->unlock(myo::Myo::unlockHold);
-
-		// Notify the Myo that the pose has resulted in an action, in this case changing
-		// the text on the screen. The Myo will vibrate.
-		myo->notifyUserAction();
-	}
-	else {
-		// Tell the Myo to stay unlocked only for a short period. This allows the Myo to stay unlocked while poses
-		// are being performed, but lock after inactivity.
-		myo->unlock(myo::Myo::unlockTimed);
 	}
 }
 
@@ -186,9 +165,9 @@ void DataCollector::printEMG()
 {
 	// Print out the EMG data.
 	std::cout << "EMG:\t\t";
-	for (size_t i = 0; i < emgSamples.size(); i++) {
+	for (size_t i = 0; i < emg_data.size(); i++) {
 		std::ostringstream oss;
-		oss << static_cast<int>(emgSamples[i]);
+		oss << static_cast<int>(emg_data[i]);
 		std::string emgString = oss.str();
 		std::cout << '[' << emgString << std::string(4 - emgString.size(), ' ') << ']';
 	}
@@ -210,7 +189,7 @@ void printVector3(myo::Vector3<float> vector){
 void DataCollector::printGyro()
 {
 	std::cout << "Gyroscop:\t";
-	printVector3(gyroData);
+	printVector3(gyr_data);
 	std::cout << std::flush;
 }
 
@@ -232,7 +211,7 @@ void DataCollector::printOrientation(){
 void DataCollector::printAccelerometer()
 {
 	std::cout << "Accelerometer:\t";
-	printVector3(accelerometerData);
+	printVector3(acc_data);
 	std::cout << std::flush;
 }
 
@@ -245,10 +224,10 @@ void DataCollector::gestureRecordOn(){
 	isAccRecording = true;
 
 
-	gestureEmgCounter = 0;
-	gestureGyrCounter = 0;
-	gestureAccCounter = 0;
-	gestureOriCounter = 0;
+	emg_sampling_counter = 0;
+	gyr_sampling_counter = 0;
+	acc_sampling_counter = 0;
+	ori_sampling_counter = 0;
 
 	begin_time = clock();
 
@@ -259,7 +238,7 @@ void DataCollector::gestureRecordOff(){
 	std::cout << "gesture recording finished..." << std::endl << std::endl;
 
 	begin_time = clock();
-	Gesture prediction = gestureComparisons(inputGesture);
+	Gesture prediction = gestureComparisons(input_gesture);
 	
 
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl;
@@ -271,26 +250,23 @@ void DataCollector::gestureRecordOff(){
 }
 
 void DataCollector::recorder(Sensor sensor, myo::Quaternion<float> quat){
-	bool *isRecording = NULL;
-	int *counter = NULL;
-	
-	isRecording = &isOriRecording;
-	counter = &gestureOriCounter;
+	bool *isRecording = &isOriRecording;
+	int *counter = &ori_sampling_counter;
 
-	int dataLength;
-	int numberOfArrays;
+	int data_length;
+	int number_of_arrays;
 
-	setDataLengt(dataLength, sensor);
-	setNumberOfArrays(numberOfArrays, sensor);
+	setDataLengt(data_length, sensor);
+	setNumberOfArrays(number_of_arrays, sensor);
 
-	if (*isRecording && *counter < dataLength){
-		for (int i = 0; i < numberOfArrays; i++) {
+	if (*isRecording && *counter < data_length){
+		for (int i = 0; i < number_of_arrays; i++) {
 			double* ori = new double[NUMBER_OF_ORI_ARRAYS];
 			ori[0] = quat.x();
 			ori[1] = quat.y();
 			ori[2] = quat.z();
 			ori[3] = quat.w();
-			inputGesture.setSensorArrayValueAt(*counter, i, (double)ori[i], sensor);
+			input_gesture.setSensorArrayValueAt(*counter, i, (double)ori[i], sensor);
 		}
 		//std::cout << *counter<< std::endl;
 		*counter += 1;
@@ -307,34 +283,33 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 	switch (sensor){
 	case EMG:
 		isRecording = &isEmgRecording;
-		counter = &gestureEmgCounter;
+		counter = &emg_sampling_counter;
 		break;
 	case ACC:
 		isRecording = &isAccRecording;
-		counter = &gestureAccCounter;
+		counter = &acc_sampling_counter;
 		break;
 	case GYR:
 		isRecording = &isGyrRecording;
-		counter = &gestureGyrCounter;
+		counter = &gyr_sampling_counter;
 		break;
 	}
 
-	int dataLength, numberOfArrays;
+	int data_length, number_of_arrays;
 
-	setDataLengt(dataLength, sensor);
-	setNumberOfArrays(numberOfArrays, sensor);
+	setDataLengt(data_length, sensor);
+	setNumberOfArrays(number_of_arrays, sensor);
 
-	if (*isRecording && *counter < dataLength){
-		for (int i = 0; i < numberOfArrays; i++) {
+	if (*isRecording && *counter < data_length){
+		for (int i = 0; i < number_of_arrays; i++) {
 			if (sensor == EMG){
-				inputGesture.setSensorArrayValueAt(*counter, i, (int)array[i], sensor);
+				input_gesture.setSensorArrayValueAt(*counter, i, (int)array[i], sensor);
 			}
 			else
 			{
-				inputGesture.setSensorArrayValueAt(*counter, i, (double)array[i], sensor);
+				input_gesture.setSensorArrayValueAt(*counter, i, (double)array[i], sensor);
 			}
 		}
-		//std::cout << *counter<< std::endl;
 		*counter += 1;
 	}
 	else if (*isRecording){
@@ -347,8 +322,8 @@ bool DataCollector::isRecordingFinished(){
 	return isEmgRecording || isAccRecording || isOriRecording || isGyrRecording;
 }
 
-void DataCollector::setInputGestureAt(int i, int j, double value, Sensor sensor){
-	inputGesture.setSensorArrayValueAt(i,j,value,sensor);
+void DataCollector::setInputGestureSensorArrayValueAt(int i, int j, double value, Sensor sensor){
+	input_gesture.setSensorArrayValueAt(i,j,value,sensor);
 }
 
 

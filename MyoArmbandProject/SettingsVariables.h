@@ -10,7 +10,4 @@ static const bool isOriSensorOn = true;
 //DTW or cross-correlation
 static const bool isDtwUsed = false;
 
-
-
-
 #endif
