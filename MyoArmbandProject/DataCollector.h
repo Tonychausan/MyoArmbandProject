@@ -86,7 +86,7 @@ public:
 	template <typename DataArray>
 	void recorder(Sensor, DataArray);
 
-	void setInputGestureSensorArrayValueAt(int, int, double, Sensor);
+	void setInputGestureSensorArrayValueAt(int position, int array_id, double value, Sensor sensor);
 
 };
 

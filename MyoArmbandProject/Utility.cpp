@@ -353,7 +353,7 @@ double maxOfArray(double* a, int size){
 	return max;
 }
 
-Gesture gestureComparisons(DataHandler gestureInput){
+Gesture gestureComparisons(DataHandler gesture_input){
 	if (!isAllSensorOn())
 	{
 		std::cout << "Sensor ignored: ";
@@ -372,7 +372,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 	if(isDtwUsed)
 		std::cout << "Dynamic Time Warping";
 	else
-		std::cout << "Cross-correlation";
+		std::cout << "Cross Correlation";
 	std::cout << std::endl << std::endl;
 	
 
@@ -391,7 +391,7 @@ Gesture gestureComparisons(DataHandler gestureInput){
 		{
 			std::string test_filename = getCompressedFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
 			std::cout << test_filename;
-			DataFileHandler testGesture(test_filename);
+			DataFileHandler gesture_test(test_filename);
 			number_of_IMU_sensors = 0;
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
@@ -399,10 +399,10 @@ Gesture gestureComparisons(DataHandler gestureInput){
 				if (isSensorIgnored(sensor))
 					continue;
 				else if (sensor == EMG){
-					emg_comparison += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
+					emg_comparison += compareArrays(gesture_input.getArrays(sensor), gesture_test.getArrays(sensor), sensor);
 				}
 				else{
-					corr_r += compareArrays(gestureInput.getArrays(sensor), testGesture.getArrays(sensor), sensor);
+					corr_r += compareArrays(gesture_input.getArrays(sensor), gesture_test.getArrays(sensor), sensor);
 					
 					number_of_IMU_sensors++;
 				}

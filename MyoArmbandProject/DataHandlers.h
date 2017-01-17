@@ -8,13 +8,24 @@
 
 class DataHandler{
 protected:
-	double** emgArrays;
-	double** gyrArrays;
-	double** accArrays;
-	double** oriArrays;
+	// Sensor Arrays
+	double** emg_arrays;
+	double** gyr_arrays;
+	double** acc_arrays;
+	double** ori_arrays;
 public:
 	DataHandler();
-	void setSensorArray(double**, Sensor);
+	/*
+	* Function: setSensorArray
+	* ----------------------------
+	*   Store array to one of the Sensor arrays given by sensor
+	*
+	*	array: array
+	*	sensor: sensor
+	*/
+	void setSensorArray(double** array, Sensor sensor);
+
+
 	double** getWorkingArrays(Sensor);
 	double** getArrays(Sensor);
 };
@@ -24,8 +35,8 @@ private:
 	std::string filename;
 public:
 	DataFileHandler(std::string);
-	void generateSensorDataArray(Json::Value, Sensor);
-	void generateDataArrays();
+	void generateSensorArray(Json::Value, Sensor);
+	void generateSensorArrays();
 };
 
 class DataInputHandler : public DataHandler{
@@ -33,7 +44,7 @@ private:
 public:
 	DataInputHandler();
 	void generateSensorArrays(Sensor);
-	void setSensorArrayValueAt(int, int, double value, Sensor sensor);
+	void setSensorArrayValueAt(int position, int array_id, double value, Sensor sensor);
 	void reset();
 };
 

@@ -20,33 +20,33 @@ DataFileHandler::DataFileHandler(std::string name)
 	filename = "data/";
 	filename.append(name);
 
-	generateDataArrays();
+	generateSensorArrays();
 }
 
 
-void DataFileHandler::generateSensorDataArray(Json::Value obj, Sensor sensor){
+void DataFileHandler::generateSensorArray(Json::Value obj, Sensor sensor){
 	const Json::Value& jsonObject = obj[getJsonArrayNameBySensor(sensor)];
 	const Json::Value& data = jsonObject["data"];
 
-	int numberOfArrays, dataLength;
+	int number_of_arrays, data_length;
 
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
+	setNumberOfArrays(number_of_arrays, sensor);
+	setDataLengt(data_length, sensor);
 
-	double **workArrays = new double*[numberOfArrays];
-	for (int i = 0; i < numberOfArrays; i++)
+	double **work_arrays = new double*[number_of_arrays];
+	for (int i = 0; i < number_of_arrays; i++)
 	{
-		workArrays[i] = new double[dataLength];
-		for (int j = 0; j < dataLength; j++)
+		work_arrays[i] = new double[data_length];
+		for (int j = 0; j < data_length; j++)
 		{
-			workArrays[i][j] = data[j][i].asDouble();
+			work_arrays[i][j] = data[j][i].asDouble();
 		}
 	}
 
-	setSensorArray(workArrays, sensor);
+	setSensorArray(work_arrays, sensor);
 }
 
-void DataFileHandler::generateDataArrays(){
+void DataFileHandler::generateSensorArrays(){
 	std::ifstream ifs(filename);
 	Json::Reader reader;
 	Json::Value obj;
@@ -55,56 +55,56 @@ void DataFileHandler::generateDataArrays(){
 	for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 	{
 		Sensor sensor = static_cast<Sensor>(k);
-		generateSensorDataArray(obj, sensor);
+		generateSensorArray(obj, sensor);
 	}
 }
 
 void DataHandler::setSensorArray(double** array, Sensor sensor){
 	switch (sensor){
 	case EMG:
-		emgArrays = array;
+		emg_arrays = array;
 		break;
 	case ACC:
-		accArrays = array;
+		acc_arrays = array;
 		break;
 	case GYR:
-		gyrArrays = array;
+		gyr_arrays = array;
 		break;
 	case ORI:
-		oriArrays = array;
+		ori_arrays = array;
 		break;
 	}
 }
 
 double** DataHandler::getWorkingArrays(Sensor sensor){
-	double **workArrays;
+	double **work_arrays;
 	switch (sensor){
 	case EMG:
-		workArrays = emgArrays;
+		work_arrays = emg_arrays;
 		break;
 	case ACC:
-		workArrays = accArrays;
+		work_arrays = acc_arrays;
 		break;
 	case GYR:
-		workArrays = gyrArrays;
+		work_arrays = gyr_arrays;
 		break;
 	default: //ORI
-		workArrays = oriArrays;
+		work_arrays = ori_arrays;
 		break;
 	}
-	return workArrays;
+	return work_arrays;
 }
 
 double** DataHandler::getArrays(Sensor sensor){
 	switch (sensor){
 	case EMG:
-		return emgArrays;
+		return emg_arrays;
 	case ACC:
-		return gyrArrays;
+		return gyr_arrays;
 	case GYR:
-		return accArrays;
+		return acc_arrays;
 	case ORI:
-		return oriArrays;
+		return ori_arrays;
 	default:
 		return NULL;
 	}
@@ -119,32 +119,32 @@ DataInputHandler::DataInputHandler(){
 }
 
 void DataInputHandler::generateSensorArrays(Sensor sensor){
-	int numberOfArrays, dataLength;
+	int number_of_arrays, data_length;
 
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
+	setNumberOfArrays(number_of_arrays, sensor);
+	setDataLengt(data_length, sensor);
 
-	double **workArrays = new double*[numberOfArrays];
-	for (int i = 0; i < numberOfArrays; i++)
+	double **workArrays = new double*[number_of_arrays];
+	for (int i = 0; i < number_of_arrays; i++)
 	{
-		workArrays[i] = new double[dataLength];
+		workArrays[i] = new double[data_length];
 	}
 
 	setSensorArray(workArrays, sensor);
 }
 
-void DataInputHandler::setSensorArrayValueAt(int i, int j, double value, Sensor sensor){
-	int numberOfArrays, dataLength;
+void DataInputHandler::setSensorArrayValueAt(int position, int array_id, double value, Sensor sensor){
+	int number_of_arrays, data_length;
 
-	setNumberOfArrays(numberOfArrays, sensor);
-	setDataLengt(dataLength, sensor);
+	setNumberOfArrays(number_of_arrays, sensor);
+	setDataLengt(data_length, sensor);
 
-	if (j > numberOfArrays || i > dataLength)
+	if (array_id > number_of_arrays || position > data_length)
 	{
-		std::cout << sensorToString(sensor) << ": Out of bound in setSensorArrayValueAt!! (" << i << "," << j << ")" << std::endl;
+		std::cout << sensorToString(sensor) << ": Out of bound in setSensorArrayValueAt!! (" << position << "," << array_id << ")" << std::endl;
 		return;
 	}
 
-	double **workArrays = getWorkingArrays(sensor);
-	workArrays[j][i] = value;
+	double **work_arrays = getWorkingArrays(sensor);
+	work_arrays[array_id][position] = value;
 }

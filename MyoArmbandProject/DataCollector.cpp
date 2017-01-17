@@ -322,8 +322,8 @@ bool DataCollector::isRecordingFinished(){
 	return isEmgRecording || isAccRecording || isOriRecording || isGyrRecording;
 }
 
-void DataCollector::setInputGestureSensorArrayValueAt(int i, int j, double value, Sensor sensor){
-	input_gesture.setSensorArrayValueAt(i,j,value,sensor);
+void DataCollector::setInputGestureSensorArrayValueAt(int position, int array_id, double value, Sensor sensor){
+	input_gesture.setSensorArrayValueAt(position,array_id,value,sensor);
 }
 
 
