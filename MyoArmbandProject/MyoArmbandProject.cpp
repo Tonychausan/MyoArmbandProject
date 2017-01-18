@@ -27,8 +27,8 @@
 
 #include <json/json.h>
 
-volatile bool isRecording = false;
-volatile bool dummy = false;
+//volatile bool isRecording = false;
+//volatile bool dummy = false;
 
 bool isMyoFound = false;
 
@@ -76,7 +76,7 @@ void menu(int& action){
 	std::cin >> action;
 }
 
-void keyboardInterruptDetector()
+/*void keyboardInterruptDetector()
 {
 	while (isProgramRunning)
 	{
@@ -93,7 +93,7 @@ void keyboardInterruptDetector()
 		}
 	}
 	
-}
+}*/
 
 void initTests(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
@@ -127,32 +127,17 @@ START_MENU:
 			isProgramRunning = false;
 
 			while (true){
-				// Compress files
 				if (action == 3){
 					compressFiles();
 				}
-				// Test gestures with pre-sampled file tests
 				else if (action == 4){
 					runPreSampledDataTests();
 				}
-				// Print Measurment
 				else if (action == 2){
 					liveDataPrint(collector, hub);
 				}
-				// Try some gesture recording
 				else {
-					isProgramRunning = true;
-					std::cout << RECORD_PRESTART_MESSEGE << std::endl;
-					std::thread keyboardInterrupt(keyboardInterruptDetector);
-
-					while (isProgramRunning){
-						if (isRecording){
-							collector.gestureRecordOn();
-							isRecording = false;
-						}
-						hub.run(1000 / 5);
-					}
-					keyboardInterrupt.join();
+					liveGestureRecognition(collector, hub);
 				}
 				menu(action);
 			}

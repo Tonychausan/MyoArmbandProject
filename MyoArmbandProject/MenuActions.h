@@ -17,4 +17,6 @@ void compressFiles();
 
 void liveDataPrint(DataCollector &collector, myo::Hub &hub);
 
+void liveGestureRecognition(DataCollector &collector, myo::Hub &hub);
+
 #endif

@@ -1,8 +1,14 @@
 #include "stdafx.h"
 
+#include <thread>
+
 #include "MenuActions.h"
 #include "DataCollector.h"
 #include "Utility.h"
+#include "Constants.h"
+
+bool dummy = false;
+bool isRecording = false;
 
 void testFile(std::string filename, Gesture gesture){
 	std::cout << "##############################" << std::endl << "Test file: " << filename << std::endl;
@@ -59,4 +65,37 @@ void liveDataPrint(DataCollector &collector, myo::Hub &hub){
 		collector.printGyro();
 		collector.printOrientation();
 	}
+}
+
+void keyboardInterruptDetector()
+{
+	while (isProgramRunning)
+	{
+		if (!isRecording)
+		{
+			// prevent first time auto-start bug
+			if (!dummy)
+			{
+				std::cin.ignore();
+				dummy = true;
+			}
+			std::cin.ignore();
+			isRecording = true;
+		}
+	}
+}
+
+void liveGestureRecognition(DataCollector &collector, myo::Hub &hub){
+	isProgramRunning = true;
+	std::cout << RECORD_PRESTART_MESSEGE << std::endl;
+	std::thread keyboardInterrupt(keyboardInterruptDetector);
+
+	while (isProgramRunning){
+		if (isRecording){
+			collector.gestureRecordOn();
+			isRecording = false;
+		}
+		hub.run(1000 / 5);
+	}
+	keyboardInterrupt.join();
 }
