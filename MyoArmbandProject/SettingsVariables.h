@@ -10,4 +10,6 @@ static const bool isOriSensorOn = true;
 //DTW or cross-correlation
 static const bool isDtwUsed = false;
 
+static const int DATA_TIME_INTERVAL_GESTURE = 3; //Gesture interval for recording in seconds
+
 #endif

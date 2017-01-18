@@ -14,17 +14,17 @@ DataHandler::DataHandler(){
 
 };
 
-DataFileHandler::DataFileHandler(std::string name)
+FileDataHandler::FileDataHandler(std::string name)
 	:DataHandler()
 {
 	filename = "data/";
 	filename.append(name);
 
-	generateSensorArrays();
+	generateAllSensorData();
 }
 
 
-void DataFileHandler::generateSensorArray(Json::Value obj, Sensor sensor){
+void FileDataHandler::generateSensorData(Json::Value obj, Sensor sensor){
 	const Json::Value& jsonObject = obj[getJsonArrayNameBySensor(sensor)];
 	const Json::Value& data = jsonObject["data"];
 
@@ -43,10 +43,10 @@ void DataFileHandler::generateSensorArray(Json::Value obj, Sensor sensor){
 		}
 	}
 
-	setSensorArray(work_arrays, sensor);
+	setSensorData(work_arrays, sensor);
 }
 
-void DataFileHandler::generateSensorArrays(){
+void FileDataHandler::generateAllSensorData(){
 	std::ifstream ifs(filename);
 	Json::Reader reader;
 	Json::Value obj;
@@ -55,85 +55,64 @@ void DataFileHandler::generateSensorArrays(){
 	for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 	{
 		Sensor sensor = static_cast<Sensor>(k);
-		generateSensorArray(obj, sensor);
+		generateSensorData(obj, sensor);
 	}
 }
 
-void DataHandler::setSensorArray(double** array, Sensor sensor){
+void DataHandler::setSensorData(double** array, Sensor sensor){
 	switch (sensor){
 	case EMG:
-		emg_arrays = array;
+		emg_data = array;
 		break;
 	case ACC:
-		acc_arrays = array;
+		acc_data = array;
 		break;
 	case GYR:
-		gyr_arrays = array;
+		gyr_data = array;
 		break;
 	case ORI:
-		ori_arrays = array;
+		ori_data = array;
 		break;
 	}
 }
 
-double** DataHandler::getWorkingArrays(Sensor sensor){
-	double **work_arrays;
+double** DataHandler::getSensorData(Sensor sensor){
 	switch (sensor){
 	case EMG:
-		work_arrays = emg_arrays;
-		break;
+		return emg_data;
 	case ACC:
-		work_arrays = acc_arrays;
-		break;
+		return gyr_data;
 	case GYR:
-		work_arrays = gyr_arrays;
-		break;
+		return acc_data;
 	default: //ORI
-		work_arrays = ori_arrays;
-		break;
-	}
-	return work_arrays;
-}
-
-double** DataHandler::getArrays(Sensor sensor){
-	switch (sensor){
-	case EMG:
-		return emg_arrays;
-	case ACC:
-		return gyr_arrays;
-	case GYR:
-		return acc_arrays;
-	case ORI:
-		return ori_arrays;
-	default:
-		return NULL;
+		return ori_data;
 	}
 }
 
-DataInputHandler::DataInputHandler(){
+InputDataHandler::InputDataHandler(){
 	for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 	{
 		Sensor sensor = static_cast<Sensor>(k);
-		generateSensorArrays(sensor);
+		generateSensorData(sensor);
 	}
 }
 
-void DataInputHandler::generateSensorArrays(Sensor sensor){
+void InputDataHandler::generateSensorData(Sensor sensor){
 	int number_of_arrays, data_length;
 
 	setNumberOfArrays(number_of_arrays, sensor);
 	setDataLengt(data_length, sensor);
 
-	double **workArrays = new double*[number_of_arrays];
+	double **work_data = new double*[number_of_arrays];
 	for (int i = 0; i < number_of_arrays; i++)
 	{
-		workArrays[i] = new double[data_length];
+		work_data[i] = new double[data_length];
 	}
 
-	setSensorArray(workArrays, sensor);
+	setSensorData(work_data, sensor);
 }
 
-void DataInputHandler::setSensorArrayValueAt(int position, int array_id, double value, Sensor sensor){
+void InputDataHandler::setSensorDataValueAt(int position, int array_id, double value, Sensor sensor){
 	int number_of_arrays, data_length;
 
 	setNumberOfArrays(number_of_arrays, sensor);
@@ -145,6 +124,6 @@ void DataInputHandler::setSensorArrayValueAt(int position, int array_id, double 
 		return;
 	}
 
-	double **work_arrays = getWorkingArrays(sensor);
-	work_arrays[array_id][position] = value;
+	double **work_data = getSensorData(sensor);
+	work_data[array_id][position] = value;
 }

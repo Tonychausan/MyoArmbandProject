@@ -8,44 +8,81 @@
 
 class DataHandler{
 protected:
-	// Sensor Arrays
-	double** emg_arrays;
-	double** gyr_arrays;
-	double** acc_arrays;
-	double** ori_arrays;
+	// Sensor Data
+	double** emg_data;
+	double** gyr_data;
+	double** acc_data;
+	double** ori_data;
 public:
 	DataHandler();
 	/*
-	* Function: setSensorArray
+	* Function: setSensorData
 	* ----------------------------
-	*   Store array to one of the Sensor arrays given by sensor
+	*   Store array to one of the Sensor data given by sensor
 	*
 	*	array: array
 	*	sensor: sensor
 	*/
-	void setSensorArray(double** array, Sensor sensor);
+	void setSensorData(double** array, Sensor sensor);
 
-
-	double** getWorkingArrays(Sensor);
-	double** getArrays(Sensor);
+	/*
+	* Function: setSensorData
+	* ----------------------------
+	*   returns Sensor data given by sensor
+	*
+	*	sensor: sensor
+	*
+	*	return: sensor data given by sensor
+	*/
+	double** getSensorData(Sensor sensor);
 };
 
-class DataFileHandler : public DataHandler{
+class FileDataHandler : public DataHandler{
 private:
-	std::string filename;
+	std::string filename; //JSON-filename
 public:
-	DataFileHandler(std::string);
-	void generateSensorArray(Json::Value, Sensor);
-	void generateSensorArrays();
+	FileDataHandler(std::string);
+
+	/*
+	* Function: generateSensorData
+	* ----------------------------
+	*   Generate sensor data for sensor from JSON-Object
+	*
+	*	obj: JSON-object
+	*	sensor: sensor
+	*/
+	void generateSensorData(Json::Value obj, Sensor sensor);
+	/*
+	* Function: generateAllSensorData
+	* ----------------------------
+	*   generate all sensor data from JSON-file filename
+	*/
+	void generateAllSensorData();
 };
 
-class DataInputHandler : public DataHandler{
+class InputDataHandler : public DataHandler{
 private:
 public:
-	DataInputHandler();
-	void generateSensorArrays(Sensor);
-	void setSensorArrayValueAt(int position, int array_id, double value, Sensor sensor);
-	void reset();
+	InputDataHandler();
+	/*
+	* Function: generateSensorData
+	* ----------------------------
+	*   Generate empty sensor data for sensor
+	*
+	*	sensor: sensor
+	*/
+	void generateSensorData(Sensor);
+	/*
+	* Function: setSensorDataValueAt
+	* ----------------------------
+	*   Store a value to a given position of the sensor data
+	*
+	*	position: position to store value
+	*	array_id: the array number of the given sensor data
+	*	value: value to store in sensor data
+	*	sensor: sensor
+	*/
+	void setSensorDataValueAt(int position, int array_id, double value, Sensor sensor);
 };
 
 #endif

@@ -180,27 +180,27 @@ double emgEnergyCompare(double* x, double* y, int n){
 
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_arrays, int number_of_data){
-	const Json::Value& dataType = obj[dataname];
-	const Json::Value& data = dataType["data"];
+	const Json::Value& datatype = obj[dataname];
+	const Json::Value& data = datatype["data"];
 
-	Json::Value dataVec(Json::arrayValue);
+	Json::Value data_vec(Json::arrayValue);
 	for (int j = 0; j < number_of_data; j++)
 	{
-		Json::Value tempArray(Json::arrayValue);
+		Json::Value temp_array(Json::arrayValue);
 		for (int i = 0; i < number_of_arrays; i++)
 		{
-			tempArray.append(Json::Value(data[j][i]));
+			temp_array.append(Json::Value(data[j][i]));
 		}
-		dataVec.append(Json::Value(tempArray));
+		data_vec.append(Json::Value(temp_array));
 	}
-	return dataVec;
+	return data_vec;
 }
 void compressAllFiles(){
 	for (int i = 0; i < TRANING_SIZE; i++){
-		compressFile(test_file_list[i]);
+		compressFile(training_filename_list[i]);
 	}
 	for (int i = 0; i < NUMBER_OF_TESTS; i++){
-		compressFile(presampled_test_filename_list[i]);
+		compressFile(test_filename_list[i]);
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
@@ -216,10 +216,10 @@ void compressFile(std::string filename){
 
 	Json::Value event;
 
-	event["emg"]["data"] = jsonDataArray("emg", obj, NUMBER_OF_EMG_ARRAYS, DATA_EMG_LENGTH);
-	event["acc"]["data"] = jsonDataArray("acc", obj, NUMBER_OF_ACC_ARRAYS, DATA_ACC_LENGTH);
-	event["gyr"]["data"] = jsonDataArray("gyr", obj, NUMBER_OF_GYR_ARRAYS, DATA_GYR_LENGTH);
-	event["ori"]["data"] = jsonDataArray("ori", obj, NUMBER_OF_ORI_ARRAYS, DATA_ORI_LENGTH);
+	event["emg"]["data"] = jsonDataArray("emg", obj, NUMBER_OF_EMG_ARRAYS, DATA_LENGTH_EMG);
+	event["acc"]["data"] = jsonDataArray("acc", obj, NUMBER_OF_ACC_ARRAYS, DATA_LENGTH_ACC);
+	event["gyr"]["data"] = jsonDataArray("gyr", obj, NUMBER_OF_GYR_ARRAYS, DATA_LENGTH_GYR);
+	event["ori"]["data"] = jsonDataArray("ori", obj, NUMBER_OF_ORI_ARRAYS, DATA_LENGTH_ORI);
 
 	std::ofstream file_id;
 	std::string output_filename = "data/";
@@ -234,7 +234,7 @@ void compressFile(std::string filename){
 	file_id.close();
 }
 std::string getCompressedFilename(int i){
-	return getCompressedFilename(test_file_list[i]);
+	return getCompressedFilename(training_filename_list[i]);
 }
 
 std::string getCompressedFilename(std::string filename){
@@ -269,16 +269,16 @@ bool isAllSensorOn(){
 void setDataLengt(int &data_length, Sensor sensor){
 	switch (sensor){
 	case EMG:
-		data_length = DATA_EMG_LENGTH;
+		data_length = DATA_LENGTH_EMG;
 		break;
 	case ACC:
-		data_length = DATA_ACC_LENGTH;
+		data_length = DATA_LENGTH_ACC;
 		break;
 	case GYR:
-		data_length = DATA_GYR_LENGTH;
+		data_length = DATA_LENGTH_GYR;
 		break;
 	case ORI:
-		data_length = DATA_ORI_LENGTH;
+		data_length = DATA_LENGTH_ORI;
 		break;
 	}
 };
@@ -338,7 +338,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 }
 
 Gesture gestureComparisonsJsonFile(std::string test_filename){
-	DataFileHandler gestureInput(test_filename);
+	FileDataHandler gestureInput(test_filename);
 	return gestureComparisons(gestureInput);
 }
 
@@ -391,7 +391,7 @@ Gesture gestureComparisons(DataHandler gesture_input){
 		{
 			std::string test_filename = getCompressedFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
 			std::cout << test_filename;
-			DataFileHandler gesture_test(test_filename);
+			FileDataHandler gesture_test(test_filename);
 			number_of_IMU_sensors = 0;
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
@@ -399,10 +399,10 @@ Gesture gestureComparisons(DataHandler gesture_input){
 				if (isSensorIgnored(sensor))
 					continue;
 				else if (sensor == EMG){
-					emg_comparison += compareArrays(gesture_input.getArrays(sensor), gesture_test.getArrays(sensor), sensor);
+					emg_comparison += compareArrays(gesture_input.getSensorData(sensor), gesture_test.getSensorData(sensor), sensor);
 				}
 				else{
-					corr_r += compareArrays(gesture_input.getArrays(sensor), gesture_test.getArrays(sensor), sensor);
+					corr_r += compareArrays(gesture_input.getSensorData(sensor), gesture_test.getSensorData(sensor), sensor);
 					
 					number_of_IMU_sensors++;
 				}

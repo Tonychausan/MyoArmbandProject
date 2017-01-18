@@ -18,7 +18,7 @@ void testFile(std::string filename, Gesture gesture){
 	}
 }
 
-void preDataTest(){
+void runPreSampledDataTests(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		number_of_correct_recognition[i] = 0;
@@ -27,7 +27,7 @@ void preDataTest(){
 
 	for (int i = 0; i < NUMBER_OF_TESTS; i++)
 	{
-		testFile(presampled_test_filename_list[i], presampled_definitives_list[i]);
+		testFile(test_filename_list[i], test_definitives_list[i]);
 	}
 
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
@@ -42,4 +42,21 @@ void compressFiles(){
 	compressAllFiles();
 	std::cin.ignore();
 	clearScreen();
+}
+
+void liveDataPrint(DataCollector &collector, myo::Hub &hub){
+	isProgramRunning = true;
+	while (isProgramRunning) {
+		// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
+		// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
+		hub.run(1000 / 5);
+
+		clearScreen();
+
+		collector.printStatus();
+		collector.printEMG();
+		collector.printAccelerometer();
+		collector.printGyro();
+		collector.printOrientation();
+	}
 }

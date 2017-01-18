@@ -2,6 +2,7 @@
 #define ConstantH
 
 #include <string>;
+#include "SettingsVariables.h"
 
 
 static const int NUMBER_OF_SENSORS = 4;
@@ -12,13 +13,13 @@ static const int FREQUENCY_ORI = 50;
 static const int FREQUENCY_ACC = 50;
 static const int FREQUENCY_GYR = 50;
 
-static const int GESTURE_DATA_TIME_INTERVAL = 3; //Gesture interval for recording
+
 
 // Data length for each sensor for each record based on time interval and frequence
-static const int DATA_EMG_LENGTH = FREQUENCY_EMG * GESTURE_DATA_TIME_INTERVAL;
-static const int DATA_ORI_LENGTH = FREQUENCY_ORI * GESTURE_DATA_TIME_INTERVAL;
-static const int DATA_ACC_LENGTH = FREQUENCY_ACC * GESTURE_DATA_TIME_INTERVAL;
-static const int DATA_GYR_LENGTH = FREQUENCY_GYR * GESTURE_DATA_TIME_INTERVAL;
+static const int DATA_LENGTH_EMG = FREQUENCY_EMG * DATA_TIME_INTERVAL_GESTURE;
+static const int DATA_LENGTH_ORI = FREQUENCY_ORI * DATA_TIME_INTERVAL_GESTURE;
+static const int DATA_LENGTH_ACC = FREQUENCY_ACC * DATA_TIME_INTERVAL_GESTURE;
+static const int DATA_LENGTH_GYR = FREQUENCY_GYR * DATA_TIME_INTERVAL_GESTURE;
 
 //Number of arrays for each sensor 
 static const int NUMBER_OF_EMG_ARRAYS = 8;

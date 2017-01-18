@@ -42,7 +42,7 @@ bool isSensorIgnored(Sensor sensor);
 
 
 // List of pre-sample files
-static std::string test_file_list[] = {
+static std::string training_filename_list[] = {
 	"eat01.json",
 	"eat02.json",
 	"eat03.json",
@@ -63,7 +63,7 @@ static const int NUMBER_OF_TRANING_PER_GESTURE = 3; // pre-samples per gesture
 static const int TRANING_SIZE = NUMBER_OF_GESTURES * NUMBER_OF_TRANING_PER_GESTURE;
 
 
-static std::string presampled_test_filename_list[] = {
+static std::string test_filename_list[] = {
 	"test-eat01.json",
 	"test-eat02.json",
 	"test-eat03.json",
@@ -115,7 +115,7 @@ static std::string presampled_test_filename_list[] = {
 	"test-why09.json",
 	"test-why10.json"
 };
-static Gesture presampled_definitives_list[] = {
+static Gesture test_definitives_list[] = {
 	EAT,
 	EAT,
 	EAT,

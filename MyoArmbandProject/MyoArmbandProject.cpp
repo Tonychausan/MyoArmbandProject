@@ -95,7 +95,7 @@ void keyboardInterruptDetector()
 	
 }
 
-void initTest(){
+void initTests(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		number_of_correct_recognition[i] = 0;
@@ -105,15 +105,13 @@ void initTest(){
 
 int main(int argc, char** argv)
 {
-	// We catch any exceptions that might occur below -- see the catch statement for more details.
-	// Action menu
-	int action;
+	int action; // action variable for menu
 
 START_MENU:
 	menu(action);
 
 	if (action == 4)
-		preDataTest();
+		runPreSampledDataTests();
 	else if (action == 3)
 		compressFiles();
 	else{
@@ -135,11 +133,11 @@ START_MENU:
 				}
 				// Test gestures with pre-sampled file tests
 				else if (action == 4){
-					preDataTest();
+					runPreSampledDataTests();
 				}
 				// Print Measurment
 				else if (action == 2){
-					isProgramRunning = true;
+					/*isProgramRunning = true;
 					while (isProgramRunning) {
 						// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
 						// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
@@ -152,7 +150,8 @@ START_MENU:
 						collector.printAccelerometer();
 						collector.printGyro();
 						collector.printOrientation();
-					}
+					}*/
+					liveDataPrint(collector, hub);
 				}
 				// Try some gesture recording
 				else {
@@ -169,7 +168,6 @@ START_MENU:
 					}
 					keyboardInterrupt.join();
 				}
-
 				menu(action);
 			}
 		}

@@ -107,7 +107,7 @@ void DataCollector::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* e
 	recorder(EMG, emg);
 
 	// Recording indicator
-	if (isRecording && emg_sampling_counter % (DATA_EMG_LENGTH/10) == 0)
+	if (isRecording && emg_sampling_counter % (DATA_LENGTH_EMG/10) == 0)
 	{
 		std::cout << ".";
 	}
@@ -241,10 +241,13 @@ void DataCollector::gestureRecordOff(){
 	Gesture prediction = gestureComparisons(input_gesture);
 	
 
-	std::cout << "Prediction: " << gestureToString(prediction) << std::endl;
+	std::cout << "Recognize: " << gestureToString(prediction) << std::endl;
+
+	std::cout << "Analyse time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
+
 	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
 
-	std::cout << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
+	
 
 	isRecording  = false;
 }
@@ -266,9 +269,8 @@ void DataCollector::recorder(Sensor sensor, myo::Quaternion<float> quat){
 			ori[1] = quat.y();
 			ori[2] = quat.z();
 			ori[3] = quat.w();
-			input_gesture.setSensorArrayValueAt(*counter, i, (double)ori[i], sensor);
+			input_gesture.setSensorDataValueAt(*counter, i, (double)ori[i], sensor);
 		}
-		//std::cout << *counter<< std::endl;
 		*counter += 1;
 	}
 	else if (*isRecording){
@@ -303,11 +305,11 @@ void DataCollector::recorder(Sensor sensor, DataArray array){
 	if (*isRecording && *counter < data_length){
 		for (int i = 0; i < number_of_arrays; i++) {
 			if (sensor == EMG){
-				input_gesture.setSensorArrayValueAt(*counter, i, (int)array[i], sensor);
+				input_gesture.setSensorDataValueAt(*counter, i, (int)array[i], sensor);
 			}
 			else
 			{
-				input_gesture.setSensorArrayValueAt(*counter, i, (double)array[i], sensor);
+				input_gesture.setSensorDataValueAt(*counter, i, (double)array[i], sensor);
 			}
 		}
 		*counter += 1;
@@ -323,7 +325,7 @@ bool DataCollector::isRecordingFinished(){
 }
 
 void DataCollector::setInputGestureSensorArrayValueAt(int position, int array_id, double value, Sensor sensor){
-	input_gesture.setSensorArrayValueAt(position,array_id,value,sensor);
+	input_gesture.setSensorDataValueAt(position, array_id, value,sensor);
 }
 
 

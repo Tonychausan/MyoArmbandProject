@@ -51,7 +51,7 @@ private:
 
 
 	int input_gesture_EMG_counter;
-	DataInputHandler input_gesture;
+	InputDataHandler input_gesture;
 
 public:
 	DataCollector();
