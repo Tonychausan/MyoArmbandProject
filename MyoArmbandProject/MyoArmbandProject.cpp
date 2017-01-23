@@ -24,7 +24,6 @@
 
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
-
 #include <json/json.h>
 
 //volatile bool isRecording = false;
@@ -106,7 +105,6 @@ void initTests(){
 int main(int argc, char** argv)
 {
 	int action; // action variable for menu
-
 START_MENU:
 	menu(action);
 

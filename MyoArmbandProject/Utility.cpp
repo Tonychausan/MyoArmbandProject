@@ -11,6 +11,8 @@
 #include "Constants.h"
 #include "SettingsVariables.h"
 
+#include <fftw3.h>
+
 #define min(a,b) (((a)<(b)) ? (a):(b))
 
 
@@ -148,21 +150,58 @@ double maxSqrValue(double* array, int n){
 	return max;
 }
 
+double absComplex(fftw_complex complex){
+	pow(complex[0], 2) + ;
+}
+
 // x is in, y is test
 double emgEnergyCompare(double* x, double* y, int n){
+	fftw_complex *x_out, *y_out;
+	fftw_plan x_p, y_p;
+
+	x_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
+	y_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
+
+
+	x_p = fftw_plan_dft_r2c_1d(n, x, x_out, FFTW_ESTIMATE);
+	y_p = fftw_plan_dft_r2c_1d(n, y, y_out, FFTW_ESTIMATE);
+
+	fftw_execute(x_p);
+	fftw_execute(y_p);
+
+	fftw_destroy_plan(x_p);
+	fftw_destroy_plan(y_p);
+
+
+	double* new_x = new double[n];
+	double* new_y = new double[n];
+
+	for (int i = 0; i < n; i++)
+	{
+		new_x[i] = x_out[i][0];
+		new_y[i] = y_out[i][0];
+	}
+	if (!isDtwUsed)
+		return crossCorrelation(n / 2, new_x, new_y, n);
+	else
+		return calculateDynamicTimeWarpedDistance(new_x, new_y, n);
+
+}
+
+double emgEnergyCompare2(double* x, double* y, int n){
 	double x_max_sqr_value = maxSqrValue(x, n);
 	double y_max_sqr_value = maxSqrValue(y, n);
 
 	int intervals = 50;
 	int size_of_intervals = n/intervals;
-	
+
 	double* new_x = new double[intervals];
 	double* new_y = new double[intervals];
 
 	for (int i = 0; i < intervals; i++){
 		double part_sum_x = 0.0;
 		double part_sum_y = 0.0;
-		
+
 		for (int j = 0; j < size_of_intervals; ++j)
 		{
 			part_sum_x += pow(x[i*size_of_intervals + j], 2) / x_max_sqr_value;
@@ -176,6 +215,7 @@ double emgEnergyCompare(double* x, double* y, int n){
 		return crossCorrelation(intervals / 2, new_x, new_y, intervals);
 	else
 		return calculateDynamicTimeWarpedDistance(new_x, new_y, intervals);
+	
 }
 
 

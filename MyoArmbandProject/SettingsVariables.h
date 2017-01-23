@@ -2,10 +2,10 @@
 #define SettingsVariablesH
 
 // List of sensors to ignor in the gesture prediction
-static const bool isEmgSensorOn = false;
-static const bool isAccSensorOn = true;
-static const bool isGyrSensorOn = true;
-static const bool isOriSensorOn = true;
+static const bool isEmgSensorOn = true;
+static const bool isAccSensorOn = false;
+static const bool isGyrSensorOn = false;
+static const bool isOriSensorOn = false;
 
 //DTW or cross-correlation
 static const bool isDtwUsed = false;
