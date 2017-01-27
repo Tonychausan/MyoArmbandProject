@@ -4,14 +4,17 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+
 #include <json/json.h>
+#include <fftw3.h>
 
 #include "Utility.h"
 #include "DataUtility.h"
 #include "Constants.h"
 #include "SettingsVariables.h"
+#include "fasttransforms.h"
 
-#include <fftw3.h>
+
 
 #define min(a,b) (((a)<(b)) ? (a):(b))
 
@@ -55,13 +58,13 @@ void clearScreen()
 }
 
 double crossCorrelation(int maxdelay, double* x, double* y, int size_of_array){
-	// first values
 	double xFirst = x[0];
 	double yFirst = y[0];
 
 	int i, j;
 	double mx, my, sx, sy, sxy, denom, r;
-	/* Calculate the mean of the two series x[], y[] */
+	
+
 	mx = 0;
 	my = 0;
 	for (i=0; i<size_of_array; i++) {
@@ -71,7 +74,6 @@ double crossCorrelation(int maxdelay, double* x, double* y, int size_of_array){
 	mx /= size_of_array;
 	my /= size_of_array;
 
-	/* Calculate the denominator */
 	sx = 0;
 	sy = 0;
 	for (i = 0; i<size_of_array; i++) {
@@ -79,8 +81,6 @@ double crossCorrelation(int maxdelay, double* x, double* y, int size_of_array){
 		sy += (y[i] - yFirst - my) * (y[i] - yFirst - my);
 	}
 	denom = sqrt(sx*sy);
-
-	/* Calculate the correlation series */
 	r = 0.0;
 	int d = -maxdelay;
 	for (int delay = -maxdelay; delay < maxdelay; delay++) {
@@ -97,12 +97,10 @@ double crossCorrelation(int maxdelay, double* x, double* y, int size_of_array){
 			r = sxy / denom;
 		}
 
-
-		/* r is the correlation coefficient at "delay" */
-
 	}
 
 	return r;
+
 }
 
 double calculateEuclideanDistance(double x, double y) {
@@ -150,12 +148,8 @@ double maxSqrValue(double* array, int n){
 	return max;
 }
 
-double absComplex(fftw_complex complex){
-	pow(complex[0], 2) + ;
-}
-
 // x is in, y is test
-double emgEnergyCompare(double* x, double* y, int n){
+double emgFourierTransformedCompare(double* x, double* y, int n){
 	fftw_complex *x_out, *y_out;
 	fftw_plan x_p, y_p;
 
@@ -188,7 +182,7 @@ double emgEnergyCompare(double* x, double* y, int n){
 
 }
 
-double emgEnergyCompare2(double* x, double* y, int n){
+double emgEnergyCompare(double* x, double* y, int n){
 	double x_max_sqr_value = maxSqrValue(x, n);
 	double y_max_sqr_value = maxSqrValue(y, n);
 
@@ -364,7 +358,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 	for (int i = 0; i < number_of_arrays; i++)
 	{
 		if (sensor == EMG){
-			r += emgEnergyCompare(in[i], test[i], data_length);
+			r += emgFourierTransformedCompare(in[i], test[i], data_length);
 		}
 		else{
 			if (!isDtwUsed)

@@ -196,13 +196,13 @@ void DataCollector::printGyro()
 void DataCollector::printOrientation(){
 	std::cout << "Orientation:\t";
 
-	int const nrOfOrientations = 3;
-	float values[nrOfOrientations] = { roll_w, pitch_w, yaw_w };
-	for (size_t i = 0; i < nrOfOrientations; i++) {
+	int const number_of_orientations = 3;
+	float values[number_of_orientations] = { roll_w, pitch_w, yaw_w };
+	for (size_t i = 0; i < number_of_orientations; i++) {
 		std::ostringstream oss;
 		oss << static_cast<float>(values[i]);
-		std::string outString = oss.str();
-		std::cout << '[' << outString << std::string(3 - outString.size(), ' ') << ']';
+		std::string out_string = oss.str();
+		std::cout << '[' << out_string << std::string(3 - out_string.size(), ' ') << ']';
 	}
 	std::cout << "\t\t(roll, pitch, yaw)";
 	std::cout << std::endl;

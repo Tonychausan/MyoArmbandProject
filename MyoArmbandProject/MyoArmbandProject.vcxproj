@@ -54,7 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\JsonCpp\dist;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\myo-sdk-win-0.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\MyoArmbandProject\alglib\src;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\JsonCpp\dist;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\myo-sdk-win-0.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,6 +84,19 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alglib\src\alglibinternal.h" />
+    <ClInclude Include="alglib\src\alglibmisc.h" />
+    <ClInclude Include="alglib\src\ap.h" />
+    <ClInclude Include="alglib\src\dataanalysis.h" />
+    <ClInclude Include="alglib\src\diffequations.h" />
+    <ClInclude Include="alglib\src\fasttransforms.h" />
+    <ClInclude Include="alglib\src\integration.h" />
+    <ClInclude Include="alglib\src\interpolation.h" />
+    <ClInclude Include="alglib\src\linalg.h" />
+    <ClInclude Include="alglib\src\optimization.h" />
+    <ClInclude Include="alglib\src\solvers.h" />
+    <ClInclude Include="alglib\src\specialfunctions.h" />
+    <ClInclude Include="alglib\src\statistics.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DataCollector.h" />
     <ClInclude Include="DataHandlers.h" />
@@ -98,6 +111,19 @@
     <ClCompile Include="..\JsonCpp\dist\jsoncpp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="alglib\src\alglibinternal.cpp" />
+    <ClCompile Include="alglib\src\alglibmisc.cpp" />
+    <ClCompile Include="alglib\src\ap.cpp" />
+    <ClCompile Include="alglib\src\dataanalysis.cpp" />
+    <ClCompile Include="alglib\src\diffequations.cpp" />
+    <ClCompile Include="alglib\src\fasttransforms.cpp" />
+    <ClCompile Include="alglib\src\integration.cpp" />
+    <ClCompile Include="alglib\src\interpolation.cpp" />
+    <ClCompile Include="alglib\src\linalg.cpp" />
+    <ClCompile Include="alglib\src\optimization.cpp" />
+    <ClCompile Include="alglib\src\solvers.cpp" />
+    <ClCompile Include="alglib\src\specialfunctions.cpp" />
+    <ClCompile Include="alglib\src\statistics.cpp" />
     <ClCompile Include="DataHandlers.cpp" />
     <ClCompile Include="DataUtility.cpp" />
     <ClCompile Include="MenuActions.cpp" />

@@ -167,7 +167,7 @@ static Gesture test_definitives_list[] = {
 	WHY,
 	WHY
 };
-static const int  NUMBER_OF_TESTS = 1;
+static const int  NUMBER_OF_TESTS = 50;
 
 
 #endif

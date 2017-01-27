@@ -192,3 +192,5 @@ JsonCpp/
 myo-sdk-win-0.9.0/
 fftw-3.3.5-dll32/
 fftw-3.3.5-dll64/
+MyoArmbandProject/alglib/
+opennn_3.0/

@@ -1,7 +1,7 @@
 #ifndef ConstantH
 #define ConstantH
 
-#include <string>;
+#include <string>
 #include "SettingsVariables.h"
 
 
