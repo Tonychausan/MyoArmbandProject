@@ -67,13 +67,46 @@ void printMenu(){
 	std::cout << "2) Measurment display" << std::endl;
 	std::cout << "3) Compress files" << std::endl;
 	std::cout << "4) Pre-data gesture comparison" << std::endl;
+	std::cout << "5) Test Neural Network" << std::endl;
 }
 
-void menu(int& action){
-	action = 0;
-	printMenu();
-	std::cin >> action;
+bool isMyoDependentActivity(int action){
+	switch (action) {
+	case 3:
+	case 5:
+	case 4: return false;
+	default:
+		return true;
+	}
 }
+
+void menu(int& action, bool print, myo::Hub *hub = NULL){
+	if (print){
+		action = 0;
+		printMenu();
+		std::cin >> action;
+	}
+
+	if (action == 3){
+		compressFiles();
+	}
+	else if (action == 4){
+		runPreSampledDataTests();
+	}
+	else if (action == 5){
+		// do some neural network shit
+	}
+	else if (hub != NULL){ //Myo dependent activity
+		
+		if (action == 2){
+			liveDataPrint(collector, *hub);
+		}
+		else {
+			liveGestureRecognition(collector, *hub);
+		}
+	}
+}
+
 
 /*void keyboardInterruptDetector()
 {
@@ -106,12 +139,10 @@ int main(int argc, char** argv)
 {
 	int action; // action variable for menu
 START_MENU:
-	menu(action);
+	menu(action, true);
 
-	if (action == 4)
-		runPreSampledDataTests();
-	else if (action == 3)
-		compressFiles();
+	if (!isMyoDependentActivity(action))
+		menu(action, false);
 	else{
 		try {
 			// First, we create a Hub with our application identifier. Be sure not to use the com.example namespace when
@@ -123,21 +154,10 @@ START_MENU:
 
 			// Finally we enter our main loop.
 			isProgramRunning = false;
-
+			bool printMenu = false;
 			while (true){
-				if (action == 3){
-					compressFiles();
-				}
-				else if (action == 4){
-					runPreSampledDataTests();
-				}
-				else if (action == 2){
-					liveDataPrint(collector, hub);
-				}
-				else {
-					liveGestureRecognition(collector, hub);
-				}
-				menu(action);
+				menu(action, printMenu, &hub);
+				printMenu = true;
 			}
 		}
 		catch (const std::exception& e) {

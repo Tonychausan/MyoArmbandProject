@@ -12,8 +12,8 @@
 #include "DataUtility.h"
 #include "Constants.h"
 #include "SettingsVariables.h"
-#include "fasttransforms.h"
 
+#include "opennn/opennn.h"
 
 
 #define min(a,b) (((a)<(b)) ? (a):(b))
@@ -108,8 +108,8 @@ double calculateEuclideanDistance(double x, double y) {
 }
 double calculateDynamicTimeWarpedDistance(double* t0, double* t1, int size_of_array) {
 
-	size_t m = size_of_array;
-	size_t n = size_of_array;
+	int m = size_of_array;
+	int n = size_of_array;
 
 	// Allocate the Matrix to work on:
 	std::vector<std::vector<double>> cost(m, std::vector<double>(n));
