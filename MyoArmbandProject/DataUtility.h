@@ -12,6 +12,7 @@ enum Gesture{ EAT, HELP, SLEEP, THANKYOU, WHY, NONE };
 static std::string gesture_names[] = { "EAT", "HELP", "SLEEP", "THANKYOU", "WHY" };
 static const int NUMBER_OF_GESTURES = 5;
 
+
 /*
 *Function: gestureToString
 * ----------------------------

@@ -240,7 +240,7 @@ void compressAllFiles(){
 	std::cout << "Comppression finished!" << std::endl;
 }
 void compressFile(std::string filename){
-	std::string input_filename  = TRANING_SET_FOLDER;
+	std::string input_filename  = DATA_SET_FOLDER;
 	input_filename.append(filename);
 
 	std::ifstream ifs(input_filename);
@@ -256,7 +256,7 @@ void compressFile(std::string filename){
 	event[JSON_ORI_ARRAY_NAME][JSON_ARRAY_DATA_TABLE_NAME] = jsonDataArray(JSON_ORI_ARRAY_NAME, obj, NUMBER_OF_ORI_ARRAYS, DATA_LENGTH_ORI);
 
 	std::ofstream file_id;
-	std::string output_filename = TRANING_SET_FOLDER;
+	std::string output_filename = DATA_SET_FOLDER;
 	output_filename.append(COMPRESSED_FILENAME_INITIAL);
 	output_filename.append(filename);
 	std::cout << output_filename << std::endl;
