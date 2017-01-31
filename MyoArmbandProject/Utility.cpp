@@ -231,17 +231,22 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_a
 }
 void compressAllFiles(){
 	for (int i = 0; i < TRANING_SIZE; i++){
-		compressFile(training_filename_list[i]);
+		compressFile(training_filename_list[i], true);
 	}
+
 	for (int i = 0; i < NUMBER_OF_TESTS; i++){
-		compressFile(test_filename_list[i]);
+		compressFile(test_filename_list[i], false);
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
 }
-void compressFile(std::string filename){
+void compressFile(std::string filenameToCompress, bool isTrainingSet){
+	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
+
 	std::string input_filename  = DATA_SET_FOLDER;
-	input_filename.append(filename);
+	input_filename.append(RAW_DATA_FOLDER);
+	input_filename.append(filetype_folder);
+	input_filename.append(filenameToCompress);
 
 	std::ifstream ifs(input_filename);
 	Json::Reader reader;
@@ -257,8 +262,11 @@ void compressFile(std::string filename){
 
 	std::ofstream file_id;
 	std::string output_filename = DATA_SET_FOLDER;
+	output_filename.append(COMPRESSED_DATA_FOLDER);
+	output_filename.append(filetype_folder);
+
 	output_filename.append(COMPRESSED_FILENAME_INITIAL);
-	output_filename.append(filename);
+	output_filename.append(filenameToCompress);
 	std::cout << output_filename << std::endl;
 	file_id.open(output_filename);
 

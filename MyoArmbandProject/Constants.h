@@ -34,8 +34,8 @@ static const std::string DATA_SET_FOLDER = "data/";
 static const std::string COMPRESSED_FILENAME_INITIAL = "compressed-";
 static const std::string RAW_DATA_FOLDER = "raw_files/";
 static const std::string COMPRESSED_DATA_FOLDER = "compressed_files/";
-static const std::string TEST_SET_FOLDER = "test_set";
-static const std::string TRAINING_SET_FOLDER = "training_set";
+static const std::string TEST_SET_FOLDER = "test_set/";
+static const std::string TRAINING_SET_FOLDER = "training_set/";
 
 // Pewter json constants
 static const std::string JSON_ARRAY_DATA_TABLE_NAME = "data";
