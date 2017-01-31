@@ -30,5 +30,15 @@ static const int NUMBER_OF_ORI_ARRAYS = 4;
 
 static const std::string RECORD_PRESTART_MESSEGE = "Press <Enter> to start recording...";
 
+static const std::string TRANING_SET_FOLDER = "data/";
+static const std::string COMPRESSED_FILENAME_INITIAL = "compressed-";
+
+// Pewter json constants
+static const std::string JSON_ARRAY_DATA_TABLE_NAME = "data";
+static const std::string JSON_EMG_ARRAY_NAME = "emg";
+static const std::string JSON_ORI_ARRAY_NAME = "ori";
+static const std::string JSON_GYR_ARRAY_NAME = "gyr";
+static const std::string JSON_ACC_ARRAY_NAME = "acc";
+
 
 #endif

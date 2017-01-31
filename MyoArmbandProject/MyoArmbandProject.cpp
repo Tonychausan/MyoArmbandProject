@@ -21,6 +21,7 @@
 #include "DataCollector.h"
 #include "MenuActions.h"
 #include "Constants.h"
+#include "FannTest.h"
 
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
@@ -95,6 +96,20 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 	}
 	else if (action == 5){
 		// do some neural network shit
+		while (true){
+			int dummy;
+			std::cout <<
+				"Press (0)Train or (1)Test: ";
+			std::cin >> dummy;
+			if (!dummy)
+				for (int i = 0; i < 1; i++)
+				{
+					trainNN();
+				}
+			else
+				testNN();
+		}
+		
 	}
 	else if (hub != NULL){ //Myo dependent activity
 		

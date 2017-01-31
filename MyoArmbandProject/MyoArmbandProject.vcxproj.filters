@@ -45,6 +45,9 @@
     <ClInclude Include="SettingsVariables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FannTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Dependencies\JsonCpp\dist\jsoncpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FannTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

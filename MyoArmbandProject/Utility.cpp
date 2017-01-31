@@ -240,7 +240,7 @@ void compressAllFiles(){
 	std::cout << "Comppression finished!" << std::endl;
 }
 void compressFile(std::string filename){
-	std::string input_filename  = "data/";
+	std::string input_filename  = TRANING_SET_FOLDER;
 	input_filename.append(filename);
 
 	std::ifstream ifs(input_filename);
@@ -250,14 +250,14 @@ void compressFile(std::string filename){
 
 	Json::Value event;
 
-	event["emg"]["data"] = jsonDataArray("emg", obj, NUMBER_OF_EMG_ARRAYS, DATA_LENGTH_EMG);
-	event["acc"]["data"] = jsonDataArray("acc", obj, NUMBER_OF_ACC_ARRAYS, DATA_LENGTH_ACC);
-	event["gyr"]["data"] = jsonDataArray("gyr", obj, NUMBER_OF_GYR_ARRAYS, DATA_LENGTH_GYR);
-	event["ori"]["data"] = jsonDataArray("ori", obj, NUMBER_OF_ORI_ARRAYS, DATA_LENGTH_ORI);
+	event[JSON_EMG_ARRAY_NAME][JSON_ARRAY_DATA_TABLE_NAME] = jsonDataArray(JSON_EMG_ARRAY_NAME, obj, NUMBER_OF_EMG_ARRAYS, DATA_LENGTH_EMG);
+	event[JSON_ACC_ARRAY_NAME][JSON_ARRAY_DATA_TABLE_NAME] = jsonDataArray(JSON_ACC_ARRAY_NAME, obj, NUMBER_OF_ACC_ARRAYS, DATA_LENGTH_ACC);
+	event[JSON_GYR_ARRAY_NAME][JSON_ARRAY_DATA_TABLE_NAME] = jsonDataArray(JSON_GYR_ARRAY_NAME, obj, NUMBER_OF_GYR_ARRAYS, DATA_LENGTH_GYR);
+	event[JSON_ORI_ARRAY_NAME][JSON_ARRAY_DATA_TABLE_NAME] = jsonDataArray(JSON_ORI_ARRAY_NAME, obj, NUMBER_OF_ORI_ARRAYS, DATA_LENGTH_ORI);
 
 	std::ofstream file_id;
-	std::string output_filename = "data/";
-	output_filename.append("compressed-");
+	std::string output_filename = TRANING_SET_FOLDER;
+	output_filename.append(COMPRESSED_FILENAME_INITIAL);
 	output_filename.append(filename);
 	std::cout << output_filename << std::endl;
 	file_id.open(output_filename);
@@ -272,7 +272,7 @@ std::string getCompressedFilename(int i){
 }
 
 std::string getCompressedFilename(std::string filename){
-	std::string  name = "compressed-";
+	std::string  name = COMPRESSED_FILENAME_INITIAL;
 	name.append(filename);
 	return name;
 }
@@ -337,13 +337,13 @@ void setNumberOfArrays(int &number_of_arrays, Sensor sensor){
 std::string getJsonArrayNameBySensor(Sensor sensor){
 	switch (sensor){
 	case EMG:
-		return "emg";
+		return JSON_EMG_ARRAY_NAME;
 	case ACC:
-		return "acc";
+		return JSON_ACC_ARRAY_NAME;
 	case GYR:
-		return "gyr";
+		return JSON_GYR_ARRAY_NAME;
 	case ORI:
-		return "ori";
+		return JSON_ORI_ARRAY_NAME;
 	}
 	return "";
 }

@@ -88,6 +88,7 @@
     <ClInclude Include="DataCollector.h" />
     <ClInclude Include="DataHandlers.h" />
     <ClInclude Include="DataUtility.h" />
+    <ClInclude Include="FannTest.h" />
     <ClInclude Include="MenuActions.h" />
     <ClInclude Include="SettingsVariables.h" />
     <ClInclude Include="Utility.h" />
@@ -100,6 +101,7 @@
     </ClCompile>
     <ClCompile Include="DataHandlers.cpp" />
     <ClCompile Include="DataUtility.cpp" />
+    <ClCompile Include="FannTest.cpp" />
     <ClCompile Include="MenuActions.cpp" />
     <ClCompile Include="MyoArmbandProject.cpp" />
     <ClCompile Include="DataCollector.cpp" />
