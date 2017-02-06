@@ -14,6 +14,7 @@
 #include "SettingsVariables.h"
 
 #include "opennn/opennn.h"
+#include "dirent.h"
 
 
 #define min(a,b) (((a)<(b)) ? (a):(b))
@@ -212,6 +213,10 @@ double emgEnergyCompare(double* x, double* y, int n){
 	
 }
 
+double emgFannTrain(){
+	return NULL;
+}
+
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_arrays, int number_of_data){
 	const Json::Value& datatype = obj[dataname];
@@ -230,7 +235,7 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_a
 	return data_vec;
 }
 void compressAllFiles(){
-	for (int i = 0; i < TRANING_SIZE; i++){
+	for (int i = 0; i < TRAINING_SIZE; i++){
 		compressFile(training_filename_list[i], true);
 	}
 
@@ -240,6 +245,7 @@ void compressAllFiles(){
 
 	std::cout << "Comppression finished!" << std::endl;
 }
+
 void compressFile(std::string filenameToCompress, bool isTrainingSet){
 	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
 
@@ -265,7 +271,6 @@ void compressFile(std::string filenameToCompress, bool isTrainingSet){
 	output_filename.append(COMPRESSED_DATA_FOLDER);
 	output_filename.append(filetype_folder);
 
-	output_filename.append(COMPRESSED_FILENAME_INITIAL);
 	output_filename.append(filenameToCompress);
 	std::cout << output_filename << std::endl;
 	file_id.open(output_filename);
@@ -275,14 +280,8 @@ void compressFile(std::string filenameToCompress, bool isTrainingSet){
 
 	file_id.close();
 }
-std::string getCompressedFilename(int i){
-	return getCompressedFilename(training_filename_list[i]);
-}
-
-std::string getCompressedFilename(std::string filename){
-	std::string  name = COMPRESSED_FILENAME_INITIAL;
-	name.append(filename);
-	return name;
+std::string getTrainingFilename(int i){
+	return training_filename_list[i];
 }
 
 
@@ -380,7 +379,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 }
 
 Gesture gestureComparisonsJsonFile(std::string test_filename){
-	FileDataHandler gestureInput(test_filename);
+	FileDataHandler gestureInput(test_filename, false);
 	return gestureComparisons(gestureInput);
 }
 
@@ -431,9 +430,9 @@ Gesture gestureComparisons(DataHandler gesture_input){
 		
 		for (int j = 0; j < NUMBER_OF_TRANING_PER_GESTURE; j++)
 		{
-			std::string test_filename = getCompressedFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
-			std::cout << test_filename;
-			FileDataHandler gesture_test(test_filename);
+			std::string training_data_filename = getTrainingFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
+			std::cout << training_data_filename;
+			FileDataHandler gesture_training_data(training_data_filename, true);
 			number_of_IMU_sensors = 0;
 			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 			{
@@ -441,10 +440,10 @@ Gesture gestureComparisons(DataHandler gesture_input){
 				if (isSensorIgnored(sensor))
 					continue;
 				else if (sensor == EMG){
-					emg_comparison += compareArrays(gesture_input.getSensorData(sensor), gesture_test.getSensorData(sensor), sensor);
+					emg_comparison += compareArrays(gesture_input.getSensorData(sensor), gesture_training_data.getSensorData(sensor), sensor);
 				}
 				else{
-					corr_r += compareArrays(gesture_input.getSensorData(sensor), gesture_test.getSensorData(sensor), sensor);
+					corr_r += compareArrays(gesture_input.getSensorData(sensor), gesture_training_data.getSensorData(sensor), sensor);
 					
 					number_of_IMU_sensors++;
 				}
@@ -497,4 +496,5 @@ Gesture gestureComparisons(DataHandler gesture_input){
 	}
 	return prediction;
 }
+
 

@@ -22,6 +22,7 @@
 #include "MenuActions.h"
 #include "Constants.h"
 #include "FannTest.h"
+#include "DataUtility.h"
 
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
@@ -82,11 +83,13 @@ bool isMyoDependentActivity(int action){
 }
 
 void menu(int& action, bool print, myo::Hub *hub = NULL){
-	if (print){
-		action = 0;
-		printMenu();
-		std::cin >> action;
-	}
+	if (!print)
+		return;
+
+
+	action = 0;
+	printMenu();
+	std::cin >> action;
 
 	if (action == 3){
 		compressFiles();
@@ -96,20 +99,31 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 	}
 	else if (action == 5){
 		// do some neural network shit
-		while (true){
-			int dummy;
-			std::cout <<
-				"Press (0)Train or (1)Test: ";
-			std::cin >> dummy;
-			if (!dummy)
-				for (int i = 0; i < 1; i++)
+		/*while (true){
+			int hello;
+			std::cout << "(1)Build Training file\n(2)Train from file\n(3)Test\n";
+			std::cin >> hello;
+
+			if (hello == 1)
+				buildTrainingFile();
+			else if (hello == 2)
+				emgTrainNN();
+			else{
+				for (int i = 0; i < NUMBER_OF_TESTS; i++)
 				{
-					trainNN();
+					std::cout << test_filename_list[i] << std::endl;
+					emgTestNN(test_filename_list[i]);
+					std::cout << std::endl;
 				}
-			else
-				testNN();
-		}
+			}
+		}*/
 		
+		generateFilelist(&training_file_list, getDataSetPath(RAW, TEST));
+		
+		for (int i = 0; i < training_file_list.size; i++)
+		{
+			std::cout << training_file_list.files[i] << std::endl;
+		}
 	}
 	else if (hub != NULL){ //Myo dependent activity
 		
@@ -152,12 +166,17 @@ void initTests(){
 
 int main(int argc, char** argv)
 {
+	generateFilelist(&training_file_list, getDataSetPath(COMPRESSED, TEST));
+	generateFilelist(&test_file_list, getDataSetPath(COMPRESSED, TRAINING));
+
 	int action; // action variable for menu
+
 START_MENU:
 	menu(action, true);
 
 	if (!isMyoDependentActivity(action))
-		menu(action, false);
+		//menu(action, false);
+		int a = 3;
 	else{
 		try {
 			// First, we create a Hub with our application identifier. Be sure not to use the com.example namespace when

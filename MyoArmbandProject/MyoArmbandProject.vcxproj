@@ -54,7 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\opennn_3.0\OpenNN-master;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\JsonCpp\dist;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\myo-sdk-win-0.9.0\include;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\FANN-2.2.0-Source\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\dirent-1.21\include;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\opennn_3.0\OpenNN-master;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\JsonCpp\dist;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\myo-sdk-win-0.9.0\include;C:\Users\tony0\Development\Visual Studio 2013\Projects\MyoArmbandProject\Dependencies\FANN-2.2.0-Source\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,6 +84,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Dependencies\dirent-1.21\include\dirent.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DataCollector.h" />
     <ClInclude Include="DataHandlers.h" />

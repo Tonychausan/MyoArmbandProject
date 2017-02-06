@@ -14,10 +14,17 @@ DataHandler::DataHandler(){
 
 };
 
-FileDataHandler::FileDataHandler(std::string name)
+
+FileDataHandler::FileDataHandler(std::string name, bool isTrainingSet)
 	:DataHandler()
 {
-	filename = "data/";
+	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
+
+	filename = DATA_SET_FOLDER;
+
+	filename.append(COMPRESSED_DATA_FOLDER);
+	filename.append(filetype_folder);
+
 	filename.append(name);
 
 	generateAllSensorData();

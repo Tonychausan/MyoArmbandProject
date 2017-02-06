@@ -41,7 +41,7 @@ class FileDataHandler : public DataHandler{
 private:
 	std::string filename; //JSON-filename
 public:
-	FileDataHandler(std::string);
+	FileDataHandler(std::string name, bool isTrainingSet);
 
 	/*
 	* Function: generateSensorData

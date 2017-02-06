@@ -31,7 +31,6 @@ static const int NUMBER_OF_ORI_ARRAYS = 4;
 static const std::string RECORD_PRESTART_MESSEGE = "Press <Enter> to start recording...";
 
 static const std::string DATA_SET_FOLDER = "data/";
-static const std::string COMPRESSED_FILENAME_INITIAL = "compressed-";
 static const std::string RAW_DATA_FOLDER = "raw_files/";
 static const std::string COMPRESSED_DATA_FOLDER = "compressed_files/";
 static const std::string TEST_SET_FOLDER = "test_set/";

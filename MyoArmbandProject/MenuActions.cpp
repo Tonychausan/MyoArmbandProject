@@ -13,7 +13,7 @@ bool isRecording = false;
 void testFile(std::string filename, Gesture gesture){
 	std::cout << "##############################" << std::endl << "Test file: " << filename << std::endl;
 
-	Gesture prediction = gestureComparisonsJsonFile(getCompressedFilename(filename));
+	Gesture prediction = gestureComparisonsJsonFile(filename);
 	std::cout << std::endl << "Gesture: " << gestureToString(gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
 

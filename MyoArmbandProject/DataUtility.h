@@ -12,6 +12,8 @@ enum Gesture{ EAT, HELP, SLEEP, THANKYOU, WHY, NONE };
 static std::string gesture_names[] = { "EAT", "HELP", "SLEEP", "THANKYOU", "WHY" };
 static const int NUMBER_OF_GESTURES = 5;
 
+enum DataSetType{ TRAINING, TEST };
+enum DataSetFormat{ COMPRESSED, RAW };
 
 /*
 *Function: gestureToString
@@ -41,6 +43,27 @@ std::string sensorToString(Sensor sensor);
 */
 bool isSensorIgnored(Sensor sensor);
 
+struct Filelist{
+	std::string *files;
+	int size;
+};
+
+static Filelist training_file_list;
+static Filelist test_file_list;
+
+/*
+*Function: getDataSetPath
+* ----------------------------
+*   returns the data set path to the parameter path
+*
+*	path : return parameter, the path of the data set
+*	format : Compressed or raw data set
+*	type : Training or test data set
+*
+*/
+std::string getDataSetPath(DataSetFormat format, DataSetType type);
+void generateFilelist(Filelist *filelist, std::string path_string);
+
 
 // List of pre-sample files
 static std::string training_filename_list[] = {
@@ -61,8 +84,15 @@ static std::string training_filename_list[] = {
 	"why03.json"
 };
 static const int NUMBER_OF_TRANING_PER_GESTURE = 3; // pre-samples per gesture
-static const int TRANING_SIZE = NUMBER_OF_GESTURES * NUMBER_OF_TRANING_PER_GESTURE;
+static const int TRAINING_SIZE = NUMBER_OF_GESTURES * NUMBER_OF_TRANING_PER_GESTURE;
 
+static Gesture training_definitives_list[] = {
+	EAT, EAT, EAT,
+	HELP, HELP, HELP,
+	SLEEP, SLEEP, SLEEP,
+	THANKYOU, THANKYOU, THANKYOU,
+	WHY, WHY, WHY
+};
 
 static std::string test_filename_list[] = {
 	"test-eat01.json",

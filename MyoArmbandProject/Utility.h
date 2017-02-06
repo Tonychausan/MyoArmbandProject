@@ -78,7 +78,7 @@ double calculateDynamicTimeWarpedDistance(double* input_array, double* test_arra
 */
 void compressAllFiles();
 void compressFile(std::string filename, bool isTrainingSet);
-std::string getCompressedFilename(std::string filename);
+//std::string getCompressedFilename(std::string filename);
 
 /*
 *Function: isSensorIgnored
@@ -99,8 +99,12 @@ Gesture gestureComparisonsJsonFile(std::string testfilename);
 void setDataLengt(int& data_length, Sensor sensor);
 void setNumberOfArrays(int& number_of_arrays, Sensor sensor);
 
+std::string getTrainingFilename(int i);
+
 Gesture gestureComparisons(DataHandler);
 
 std::string getJsonArrayNameBySensor(Sensor sensor);
+
+
 
 #endif
