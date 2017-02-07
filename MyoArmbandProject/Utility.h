@@ -25,6 +25,7 @@ static int number_of_correct_recognition[NUMBER_OF_GESTURES];
 */
 void clearScreen();
 
+
 /*
 * Function: crossCorrelation
 * ----------------------------
@@ -90,9 +91,6 @@ void compressFile(std::string filename, bool isTrainingSet);
 *   returns : true if sensor is ignored, else false
 */
 bool isSensorIgnored(Sensor sensor);
-
-
-
 
 Gesture gestureComparisonsJsonFile(std::string testfilename);
 

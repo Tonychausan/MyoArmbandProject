@@ -235,12 +235,12 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_a
 	return data_vec;
 }
 void compressAllFiles(){
-	for (int i = 0; i < TRAINING_SIZE; i++){
-		compressFile(training_filename_list[i], true);
+	for (int i = 0; i < training_file_list.size; i++){
+		compressFile(training_file_list.files[i], true);
 	}
 
-	for (int i = 0; i < NUMBER_OF_TESTS; i++){
-		compressFile(test_filename_list[i], false);
+	for (int i = 0; i < test_file_list.size; i++){
+		compressFile(test_file_list.files[i], false);
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
@@ -281,7 +281,7 @@ void compressFile(std::string filenameToCompress, bool isTrainingSet){
 	file_id.close();
 }
 std::string getTrainingFilename(int i){
-	return training_filename_list[i];
+	return training_file_list.files[i];
 }
 
 
@@ -430,7 +430,7 @@ Gesture gestureComparisons(DataHandler gesture_input){
 		
 		for (int j = 0; j < NUMBER_OF_TRANING_PER_GESTURE; j++)
 		{
-			std::string training_data_filename = getTrainingFilename(i * NUMBER_OF_TRANING_PER_GESTURE + j);
+			std::string training_data_filename = training_file_list.files[i * NUMBER_OF_TRANING_PER_GESTURE + j];
 			std::cout << training_data_filename;
 			FileDataHandler gesture_training_data(training_data_filename, true);
 			number_of_IMU_sensors = 0;

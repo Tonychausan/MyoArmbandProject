@@ -31,6 +31,9 @@
 //volatile bool isRecording = false;
 //volatile bool dummy = false;
 
+Filelist training_file_list;
+Filelist test_file_list;
+
 bool isMyoFound = false;
 
 DataCollector collector;
@@ -166,8 +169,8 @@ void initTests(){
 
 int main(int argc, char** argv)
 {
-	generateFilelist(&training_file_list, getDataSetPath(COMPRESSED, TEST));
-	generateFilelist(&test_file_list, getDataSetPath(COMPRESSED, TRAINING));
+	generateFilelist(&training_file_list, getDataSetPath(COMPRESSED, TRAINING));
+	generateFilelist(&test_file_list, getDataSetPath(COMPRESSED, TEST));
 
 	int action; // action variable for menu
 

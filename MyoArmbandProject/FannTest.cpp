@@ -71,7 +71,7 @@ void buildTrainingFile(){
 	std::ofstream training_data;
 	training_data.open("NNdata/emg.data");
 
-	int number_of_training_instances = TRAINING_SIZE;
+	int number_of_training_instances = training_file_list.size;
 	int number_of_inputs = NUMBER_OF_EMG_ARRAYS;
 	int number_of_outputs = NUMBER_OF_GESTURES;
 	
@@ -87,7 +87,7 @@ void buildTrainingFile(){
 		std::string training_data_filename = getTrainingFilename(training_instance_i);
 		FileDataHandler gesture_training_data(training_data_filename, true);
 
-		int solution = static_cast<int>(training_definitives_list[training_instance_i]);
+		int solution = static_cast<int>(test_file_list.answers[training_instance_i]);
 
 		for (int i = 0; i < number_of_inputs; i++)
 		{
