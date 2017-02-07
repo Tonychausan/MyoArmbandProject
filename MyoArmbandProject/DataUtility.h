@@ -43,13 +43,19 @@ std::string sensorToString(Sensor sensor);
 */
 bool isSensorIgnored(Sensor sensor);
 
-struct Filelist{
+class Filelist{
+public:
 	std::string *files;
+	Gesture *answers;
 	int size;
 };
 
-static Filelist training_file_list;
-static Filelist test_file_list;
+
+//static Filelist training_file_list;
+//static Filelist test_file_list;
+
+extern Filelist training_file_list;
+extern Filelist test_file_list;
 
 /*
 *Function: getDataSetPath
@@ -65,8 +71,9 @@ std::string getDataSetPath(DataSetFormat format, DataSetType type);
 void generateFilelist(Filelist *filelist, std::string path_string);
 
 
+
 // List of pre-sample files
-static std::string training_filename_list[] = {
+/*static std::string training_filename_list[] = {
 	"eat01.json",
 	"eat02.json",
 	"eat03.json",
@@ -82,19 +89,19 @@ static std::string training_filename_list[] = {
 	"why01.json",
 	"why02.json",
 	"why03.json"
-};
-static const int NUMBER_OF_TRANING_PER_GESTURE = 3; // pre-samples per gesture
-static const int TRAINING_SIZE = NUMBER_OF_GESTURES * NUMBER_OF_TRANING_PER_GESTURE;
+};*/
+//static const int NUMBER_OF_TRANING_PER_GESTURE = 3; // pre-samples per gesture
+//static const int TRAINING_SIZE = NUMBER_OF_GESTURES * NUMBER_OF_TRANING_PER_GESTURE;
 
-static Gesture training_definitives_list[] = {
+/*static Gesture training_definitives_list[] = {
 	EAT, EAT, EAT,
 	HELP, HELP, HELP,
 	SLEEP, SLEEP, SLEEP,
 	THANKYOU, THANKYOU, THANKYOU,
 	WHY, WHY, WHY
-};
+};*/
 
-static std::string test_filename_list[] = {
+/*static std::string test_filename_list[] = {
 	"test-eat01.json",
 	"test-eat02.json",
 	"test-eat03.json",
@@ -145,8 +152,8 @@ static std::string test_filename_list[] = {
 	"test-why08.json",
 	"test-why09.json",
 	"test-why10.json"
-};
-static Gesture test_definitives_list[] = {
+};*/
+/*static Gesture test_definitives_list[] = {
 	EAT,
 	EAT,
 	EAT,
@@ -197,8 +204,8 @@ static Gesture test_definitives_list[] = {
 	WHY,
 	WHY,
 	WHY
-};
-static const int  NUMBER_OF_TESTS = 50;
+};*/
+//static const int  NUMBER_OF_TESTS = 50;
 
 
 #endif
