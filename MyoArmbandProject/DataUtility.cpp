@@ -70,16 +70,16 @@ void generateFilelist(Filelist *filelist, std::string path_string){
 	}
 
 	filelist->size = file_counter;
-	filelist->files = new std::string[file_counter];
-	filelist->answers = new Gesture[file_counter];
+	filelist->files = new File[file_counter];
 	if ((dir = opendir(path)) != NULL) {
 		int i = 0;
 		while ((ent = readdir(dir)) != NULL) {
 			if ((std::string)ent->d_name == "." || (std::string)ent->d_name == "..")
 				continue;
 			
-			filelist->files[i] = (std::string)ent->d_name;
-			filelist->answers[i] = getGestureFromFilename((std::string)ent->d_name);
+
+			filelist->files[i].filename = (std::string)ent->d_name;
+			filelist->files[i].answer = getGestureFromFilename((std::string)ent->d_name);
 
 			i++;
 		}

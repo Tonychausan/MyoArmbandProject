@@ -254,13 +254,13 @@ void compressAllFiles(){
 	std::cout << "Comppression finished!" << std::endl;
 }
 
-void compressFile(std::string filenameToCompress, bool isTrainingSet){
+void compressFile(File fileToCompress, bool isTrainingSet){
 	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
 
 	std::string input_filename  = DATA_SET_FOLDER;
 	input_filename.append(RAW_DATA_FOLDER);
 	input_filename.append(filetype_folder);
-	input_filename.append(filenameToCompress);
+	input_filename.append(fileToCompress.filename);
 
 	std::ifstream ifs(input_filename);
 	Json::Reader reader;
@@ -279,7 +279,7 @@ void compressFile(std::string filenameToCompress, bool isTrainingSet){
 	output_filename.append(COMPRESSED_DATA_FOLDER);
 	output_filename.append(filetype_folder);
 
-	output_filename.append(filenameToCompress);
+	output_filename.append(fileToCompress.filename);
 	std::cout << output_filename << std::endl;
 	file_id.open(output_filename);
 
@@ -437,10 +437,10 @@ Gesture gestureComparisons(DataHandler gesture_input){
 
 	for (int i = 0; i < training_file_list.size; i++)
 	{
-		std::string training_data_filename = training_file_list.files[i];
+		std::string training_data_filename = training_file_list.files[i].filename;
 		std::cout << training_data_filename;
 
-		Gesture check_gesture = training_file_list.answers[i];
+		Gesture check_gesture = training_file_list.files[i].answer;
 
 		FileDataHandler gesture_training_data(training_data_filename, true);
 		for (int k = 0; k < NUMBER_OF_SENSORS; k++)

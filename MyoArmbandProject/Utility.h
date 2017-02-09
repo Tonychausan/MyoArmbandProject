@@ -71,7 +71,7 @@ double calculateDynamicTimeWarpedDistance(double* input_array, double* test_arra
 *	filename: filename of input file
 */
 void compressAllFiles();
-void compressFile(std::string filename, bool isTrainingSet);
+void compressFile(File file, bool isTrainingSet);
 
 /*
 *Function: isSensorIgnored

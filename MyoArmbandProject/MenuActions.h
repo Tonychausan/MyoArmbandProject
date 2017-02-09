@@ -9,7 +9,7 @@
 #include "DataCollector.h"
 
 
-void testFile(std::string filename, Gesture gesture);
+void testFile(File);
 
 void runPreSampledDataTests();
 

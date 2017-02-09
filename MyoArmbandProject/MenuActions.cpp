@@ -10,17 +10,17 @@
 bool dummy = false;
 bool isRecording = false;
 
-void testFile(std::string filename, Gesture gesture){
-	std::cout << "##############################" << std::endl << "Test file: " << filename << std::endl;
+void testFile(File file){
+	std::cout << "##############################" << std::endl << "Test file: " << file.filename << std::endl;
 
-	Gesture prediction = gestureComparisonsJsonFile(filename);
-	std::cout << std::endl << "Gesture: " << gestureToString(gesture) << std::endl;
+	Gesture prediction = gestureComparisonsJsonFile(file.filename);
+	std::cout << std::endl << "Gesture: " << gestureToString(file.answer) << std::endl;
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
 
-	number_of_tests[gesture] += 1;
-	if (prediction == gesture)
+	number_of_tests[file.answer] += 1;
+	if (prediction == file.answer)
 	{
-		number_of_correct_recognition[gesture] += 1;
+		number_of_correct_recognition[file.answer] += 1;
 	}
 }
 
@@ -33,7 +33,7 @@ void runPreSampledDataTests(){
 
 	for (int i = 0; i < test_file_list.size; i++)
 	{
-		testFile(test_file_list.files[i], test_file_list.answers[i]);
+		testFile(test_file_list.files[i]);
 	}
 
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)

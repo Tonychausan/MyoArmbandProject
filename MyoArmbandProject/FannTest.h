@@ -11,7 +11,7 @@ void testNN();
 void buildTrainingFile();
 
 void emgNNfileRemover();
-void emgTestNN(std::string filename, Gesture gesture);
+void emgTestNN(File);
 void emgTrainNN();
 
 

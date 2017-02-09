@@ -114,7 +114,7 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 			else if (hello == 3){
 				for (int i = 0; i < training_file_list.size; i++)
 				{
-					emgTestNN(training_file_list.files[i], training_file_list.answers[i]);
+					emgTestNN(training_file_list.files[i]);
 				}
 			}
 			else{

@@ -86,12 +86,12 @@ void buildTrainingFile(){
 
 	for (int training_instance_i = 0; training_instance_i < number_of_training_instances; training_instance_i++)
 	{
-		std::string training_data_filename = training_file_list.files[training_instance_i];
+		std::string training_data_filename = training_file_list.files[training_instance_i].filename;
 		std::cout << training_data_filename << std::endl;
 
 		FileDataHandler gesture_training_data(training_data_filename, true);
 
-		int solution = (int)training_file_list.answers[training_instance_i];
+		int solution = (int)training_file_list.files[training_instance_i].answer;
 
 		for (int i = 0; i < number_of_inputs; i++)
 		{
@@ -159,8 +159,11 @@ void emgTrainNN(){
 	fann_destroy(ann);
 }
 
-void emgTestNN(std::string test_data_filename, Gesture gesture){
+void emgTestNN(File file){
 	int number_of_inputs = NUMBER_OF_EMG_ARRAYS;
+	
+	std::string test_data_filename = file.filename;
+	Gesture gesture = file.answer;
 
 	FileDataHandler gesture_training_data(test_data_filename, true);
 
