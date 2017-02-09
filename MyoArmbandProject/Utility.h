@@ -3,7 +3,9 @@
 
 #include <string>
 #include <array>
+
 #include <myo/myo.hpp>
+#include <fftw3.h>
 
 #include "DataUtility.h"
 #include "DataHandlers.h"
@@ -68,18 +70,8 @@ double calculateDynamicTimeWarpedDistance(double* input_array, double* test_arra
 *
 *	filename: filename of input file
 */
-/*
-* Function: getCompressedFilename
-* ----------------------------
-*   Returns the compressed-filename of filename
-*
-*	filename: raw filename
-*
-*   returns: compressed filename
-*/
 void compressAllFiles();
 void compressFile(std::string filename, bool isTrainingSet);
-//std::string getCompressedFilename(std::string filename);
 
 /*
 *Function: isSensorIgnored
@@ -92,12 +84,12 @@ void compressFile(std::string filename, bool isTrainingSet);
 */
 bool isSensorIgnored(Sensor sensor);
 
+fftw_complex *fourierTransform(double *x, int n);
+
 Gesture gestureComparisonsJsonFile(std::string testfilename);
 
 void setDataLengt(int& data_length, Sensor sensor);
 void setNumberOfArrays(int& number_of_arrays, Sensor sensor);
-
-std::string getTrainingFilename(int i);
 
 Gesture gestureComparisons(DataHandler);
 

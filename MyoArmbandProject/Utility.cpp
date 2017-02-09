@@ -7,14 +7,15 @@
 
 #include <json/json.h>
 #include <fftw3.h>
+#include "opennn/opennn.h"
+#include "dirent.h"
 
 #include "Utility.h"
 #include "DataUtility.h"
 #include "Constants.h"
 #include "SettingsVariables.h"
 
-#include "opennn/opennn.h"
-#include "dirent.h"
+
 
 
 #define min(a,b) (((a)<(b)) ? (a):(b))
@@ -157,7 +158,6 @@ double emgFourierTransformedCompare(double* x, double* y, int n){
 	x_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
 	y_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
 
-
 	x_p = fftw_plan_dft_r2c_1d(n, x, x_out, FFTW_ESTIMATE);
 	y_p = fftw_plan_dft_r2c_1d(n, y, y_out, FFTW_ESTIMATE);
 
@@ -180,7 +180,18 @@ double emgFourierTransformedCompare(double* x, double* y, int n){
 		return crossCorrelation(n / 2, new_x, new_y, n);
 	else
 		return calculateDynamicTimeWarpedDistance(new_x, new_y, n);
+}
 
+fftw_complex *fourierTransform(double *x, int n){
+	fftw_complex *x_out;
+	fftw_plan x_p;
+
+	x_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
+	x_p = fftw_plan_dft_r2c_1d(n, x, x_out, FFTW_ESTIMATE);
+	fftw_execute(x_p);
+	fftw_destroy_plan(x_p);
+
+	return x_out;
 }
 
 double emgEnergyCompare(double* x, double* y, int n){
@@ -213,9 +224,6 @@ double emgEnergyCompare(double* x, double* y, int n){
 	
 }
 
-double emgFannTrain(){
-	return NULL;
-}
 
 
 Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_arrays, int number_of_data){
@@ -279,9 +287,6 @@ void compressFile(std::string filenameToCompress, bool isTrainingSet){
 	file_id << styled_writer.write(event);
 
 	file_id.close();
-}
-std::string getTrainingFilename(int i){
-	return training_file_list.files[i];
 }
 
 
@@ -416,54 +421,61 @@ Gesture gestureComparisons(DataHandler gesture_input){
 		std::cout << "Cross Correlation";
 	std::cout << std::endl << std::endl;
 	
-
-	Gesture prediction = NONE;
+	Gesture prediction = NONE_GESTURE;
 	double r = -DBL_MAX;
 
 	double corr_rs[NUMBER_OF_GESTURES];
 	double emg_comparisons[NUMBER_OF_GESTURES];
+
 	int number_of_IMU_sensors = 0;
+
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
-		double corr_r = 0.0;
-		double emg_comparison = 0.0;
-		
-		for (int j = 0; j < NUMBER_OF_TRANING_PER_GESTURE; j++)
+		corr_rs[i] = 0.0;
+		emg_comparisons[i] = 0.0;
+	}
+
+	for (int i = 0; i < training_file_list.size; i++)
+	{
+		std::string training_data_filename = training_file_list.files[i];
+		std::cout << training_data_filename;
+
+		Gesture check_gesture = training_file_list.answers[i];
+
+		FileDataHandler gesture_training_data(training_data_filename, true);
+		for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 		{
-			std::string training_data_filename = training_file_list.files[i * NUMBER_OF_TRANING_PER_GESTURE + j];
-			std::cout << training_data_filename;
-			FileDataHandler gesture_training_data(training_data_filename, true);
-			number_of_IMU_sensors = 0;
-			for (int k = 0; k < NUMBER_OF_SENSORS; k++)
-			{
-				Sensor sensor = static_cast<Sensor>(k);
-				if (isSensorIgnored(sensor))
-					continue;
-				else if (sensor == EMG){
-					emg_comparison += compareArrays(gesture_input.getSensorData(sensor), gesture_training_data.getSensorData(sensor), sensor);
-				}
-				else{
-					corr_r += compareArrays(gesture_input.getSensorData(sensor), gesture_training_data.getSensorData(sensor), sensor);
-					
-					number_of_IMU_sensors++;
-				}
+			Sensor sensor = static_cast<Sensor>(k);
+			if (isSensorIgnored(sensor))
+				continue;
+			else if (sensor == EMG) {
+				emg_comparisons[(int) check_gesture] += compareArrays(gesture_input.getSensorData(sensor), gesture_training_data.getSensorData(sensor), sensor);
 			}
-
-			corr_rs[i] = corr_r;
-			emg_comparisons[i] = emg_comparison;
-			std::cout << '\r';
-			std::cout << "                                                                                                      ";
-			std::cout << '\r';
-
+			else {
+				corr_rs[(int)check_gesture] += compareArrays(gesture_input.getSensorData(sensor), gesture_training_data.getSensorData(sensor), sensor);
+				number_of_IMU_sensors++;
+			}
 		}
-		if (!isDtwUsed){
-			double similarity = corr_r + emg_comparison;
 
-			std::cout << gestureToString(static_cast<Gesture>(i)) << ": r = " << similarity << ",\tIMU = " << corr_r << ",\tEMG = " << emg_comparison << std::endl;
-			if (similarity > r)
+		std::cout << '\r';
+		std::cout << "                                                                                                      ";
+		std::cout << '\r';
+	}
+
+	std::cout << "Finished" << std::endl;
+
+	if (!isDtwUsed)
+	{
+		for (int i = 0; i < NUMBER_OF_GESTURES; i++)
+		{
+			Gesture gesture = static_cast<Gesture>(i);
+			double similarity = corr_rs[i] + emg_comparisons[i];
+
+			std::cout << gestureToString(gesture) << ": r = " << similarity << ",\tIMU = " << corr_rs[i] << ",\tEMG = " << emg_comparisons[i] << std::endl;
+
+			if (r < similarity)
 			{
-				r = similarity;
-				prediction = static_cast<Gesture>(i);
+				prediction = gesture;
 			}
 		}
 	}

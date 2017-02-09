@@ -3,12 +3,15 @@
 
 #include <string>
 
+#include "DataUtility.h" 
+
 void trainNN();
 void testNN();
 
 void buildTrainingFile();
 
-void emgTestNN(std::string filename);
+void emgNNfileRemover();
+void emgTestNN(std::string filename, Gesture gesture);
 void emgTrainNN();
 
 

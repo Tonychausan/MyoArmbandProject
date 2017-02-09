@@ -16,6 +16,7 @@
 #include "Utility.h"
 
 
+
 void trainNN(){
 	const unsigned int num_input = 2;
 	const unsigned int num_output = 1;
@@ -35,6 +36,10 @@ void trainNN(){
 	fann_save(ann, "NNdata/xor_float.net");
 
 	fann_destroy(ann);
+}
+
+void emgNNfileRemover(){
+	remove("NNdata/emg_float.net");
 }
 
 void testNN(){
@@ -79,15 +84,14 @@ void buildTrainingFile(){
 	training_data << number_of_inputs << " "; //
 	training_data << number_of_outputs << std::endl;
 
-
-
-
 	for (int training_instance_i = 0; training_instance_i < number_of_training_instances; training_instance_i++)
 	{
-		std::string training_data_filename = getTrainingFilename(training_instance_i);
+		std::string training_data_filename = training_file_list.files[training_instance_i];
+		std::cout << training_data_filename << std::endl;
+
 		FileDataHandler gesture_training_data(training_data_filename, true);
 
-		int solution = static_cast<int>(test_file_list.answers[training_instance_i]);
+		int solution = (int)training_file_list.answers[training_instance_i];
 
 		for (int i = 0; i < number_of_inputs; i++)
 		{
@@ -105,18 +109,28 @@ void buildTrainingFile(){
 
 		for (int o = 0; o < number_of_outputs; o++)
 		{
-			if (solution == o)
+			if (solution == o) {
 				training_data << 1;
-			else
+				std::cout << 1;
+			}
+			else {
 				training_data << 0;
+				std::cout << 0;
+			}
+			std::cout << " ";
 
-			if (o != number_of_inputs - 1)
+			if (o != number_of_inputs - 1) {
 				training_data << " ";
+			}
 		}
 
-		if (training_instance_i != number_of_training_instances - 1)
+		if (training_instance_i != number_of_training_instances - 1) {
 			training_data << std::endl;
+			std::cout << std::endl;
+		}
+			
 	}
+	std::cout << std::endl;
 
 	training_data.close();
 }
@@ -125,15 +139,18 @@ void emgTrainNN(){
 	const unsigned int num_input = NUMBER_OF_EMG_ARRAYS;
 	const unsigned int num_output = NUMBER_OF_GESTURES;
 	const unsigned int num_layers = 3;
-	const unsigned int num_neurons_hidden = NUMBER_OF_EMG_ARRAYS + 2;
-	const float desired_error = (const float) 0.00001;
+	const unsigned int num_neurons_hidden = NUMBER_OF_EMG_ARRAYS;
+	const float desired_error = (const float) 0.0001;
 	const unsigned int max_epochs = 500000;
 	const unsigned int epochs_between_reports = 1000;
 
-	struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden, num_output);
+	//struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden, num_output);
 
-	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
-	fann_set_activation_function_output(ann, FANN_SIGMOID_SYMMETRIC);
+	float 	connection_rate = 0.5;
+	struct fann *ann = fann_create_sparse(connection_rate, num_layers, num_input, num_neurons_hidden, num_output);
+
+	fann_set_activation_function_hidden(ann, FANN_SIGMOID);
+	fann_set_activation_function_output(ann, FANN_SIGMOID);
 
 	fann_train_on_file(ann, "NNdata/emg.data", max_epochs, epochs_between_reports, desired_error);
 
@@ -142,10 +159,14 @@ void emgTrainNN(){
 	fann_destroy(ann);
 }
 
-void emgTestNN(std::string test_data_filename){
+void emgTestNN(std::string test_data_filename, Gesture gesture){
 	int number_of_inputs = NUMBER_OF_EMG_ARRAYS;
 
-	FileDataHandler gesture_training_data(test_data_filename, false);
+	FileDataHandler gesture_training_data(test_data_filename, true);
+
+
+	std::cout << "###############################" << std::endl;
+	std::cout << "Input file: " << test_data_filename << "\n\n";
 
 	fann_type *calc_out;
 	fann_type input[NUMBER_OF_EMG_ARRAYS];
@@ -163,10 +184,22 @@ void emgTestNN(std::string test_data_filename){
 	}
 	calc_out = fann_run(ann, input);
 
+	double max_calc_out = (double)calc_out[0];
+	Gesture guess_gesture = (Gesture)0;
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
 	{
 		std::cout << gestureToString((Gesture)i) << ": " << calc_out[i] << std::endl;
+		if ((double)calc_out[i] > max_calc_out)
+		{
+			guess_gesture = (Gesture)i;
+			max_calc_out = calc_out[i];
+		}
 	}
+	std::cout << "\nGesture: " << gestureToString(gesture) << std::endl;
+	std::cout << "Prediction: " << gestureToString(guess_gesture) << std::endl;
+	
+
+	std::cout << std::endl;
 
 	fann_destroy(ann);
 }

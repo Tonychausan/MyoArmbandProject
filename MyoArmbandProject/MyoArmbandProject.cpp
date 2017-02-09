@@ -102,35 +102,29 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 	}
 	else if (action == 5){
 		// do some neural network shit
-		/*while (true){
+		while (true){
 			int hello;
-			std::cout << "(1)Build Training file\n(2)Train from file\n(3)Test\n";
+			std::cout << "(1)Build Training file\n(2)Train from file\n(3)Test\n(4)Remove\n";
 			std::cin >> hello;
 
 			if (hello == 1)
 				buildTrainingFile();
 			else if (hello == 2)
 				emgTrainNN();
-			else{
-				for (int i = 0; i < NUMBER_OF_TESTS; i++)
+			else if (hello == 3){
+				for (int i = 0; i < training_file_list.size; i++)
 				{
-					std::cout << test_filename_list[i] << std::endl;
-					emgTestNN(test_filename_list[i]);
-					std::cout << std::endl;
+					emgTestNN(training_file_list.files[i], training_file_list.answers[i]);
 				}
 			}
-		}*/
-		
-		generateFilelist(&training_file_list, getDataSetPath(RAW, TEST));
-		
-		for (int i = 0; i < training_file_list.size; i++)
-		{
-			std::cout << training_file_list.files[i] << std::endl;
+			else{
+				emgNNfileRemover();
+			}
 		}
 	}
 	else if (hub != NULL){ //Myo dependent activity
 		
-		if (action == 2){
+		if (action == 2) {
 			liveDataPrint(collector, *hub);
 		}
 		else {
@@ -138,26 +132,6 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 		}
 	}
 }
-
-
-/*void keyboardInterruptDetector()
-{
-	while (isProgramRunning)
-	{
-		if (!isRecording)
-		{
-			// prevent first time auto-start bug
-			if (!dummy)
-			{
-				std::cin.ignore();
-				dummy = true;
-			}
-			std::cin.ignore();
-			isRecording = true;
-		}
-	}
-	
-}*/
 
 void initTests(){
 	for (int i = 0; i < NUMBER_OF_GESTURES; i++)
@@ -169,6 +143,7 @@ void initTests(){
 
 int main(int argc, char** argv)
 {
+	// Generating filelists
 	generateFilelist(&training_file_list, getDataSetPath(COMPRESSED, TRAINING));
 	generateFilelist(&test_file_list, getDataSetPath(COMPRESSED, TEST));
 
