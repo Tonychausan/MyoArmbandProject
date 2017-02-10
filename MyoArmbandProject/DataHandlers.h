@@ -39,11 +39,9 @@ public:
 
 class FileDataHandler : public DataHandler{
 private:
-	std::string filename; //JSON-filename
-	File file;
+	File *file;
 public:
-	FileDataHandler(std::string name, bool isTrainingSet);
-	FileDataHandler(File file, bool isTrainingSet);
+	FileDataHandler(File input_file, bool isTrainingSet);
 
 	/*
 	* Function: generateSensorData

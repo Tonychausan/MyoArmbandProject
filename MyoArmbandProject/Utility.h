@@ -86,7 +86,7 @@ bool isSensorIgnored(Sensor sensor);
 
 fftw_complex *fourierTransform(double *x, int n);
 
-Gesture gestureComparisonsJsonFile(std::string testfilename);
+Gesture gestureComparisonsJsonFile(File testfile);
 
 void setDataLengt(int& data_length, Sensor sensor);
 void setNumberOfArrays(int& number_of_arrays, Sensor sensor);

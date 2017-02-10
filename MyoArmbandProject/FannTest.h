@@ -9,9 +9,13 @@ void trainNN();
 void testNN();
 
 void buildTrainingFile();
+void buildFourierTransformedTrainingFile();
 
 void emgNNfileRemover();
+
 void emgTestNN(File);
+void emgFourierTransformedTestNN(File);
+
 void emgTrainNN();
 
 

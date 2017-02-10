@@ -46,13 +46,11 @@ bool isSensorIgnored(Sensor sensor);
 class File{
 public:
 	std::string filename;
-	Gesture answer;
+	Gesture gesture;
 };
 
 class Filelist{
 public:
-	/*std::string *files;
-	Gesture *answers;*/
 	File *files;
 	int size;
 };

@@ -15,17 +15,20 @@ DataHandler::DataHandler(){
 };
 
 
-FileDataHandler::FileDataHandler(std::string name, bool isTrainingSet)
+FileDataHandler::FileDataHandler(File input_file, bool isTrainingSet)
 	:DataHandler()
 {
+	file = new File();
+	file->gesture = input_file.gesture;
+	
 	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
 
-	filename = DATA_SET_FOLDER;
-
+	std::string filename = DATA_SET_FOLDER;
 	filename.append(COMPRESSED_DATA_FOLDER);
 	filename.append(filetype_folder);
+	filename.append(input_file.filename);
 
-	filename.append(name);
+	file->filename = filename;
 
 	generateAllSensorData();
 }
@@ -54,7 +57,7 @@ void FileDataHandler::generateSensorData(Json::Value obj, Sensor sensor){
 }
 
 void FileDataHandler::generateAllSensorData(){
-	std::ifstream ifs(filename);
+	std::ifstream ifs(file->filename);
 	Json::Reader reader;
 	Json::Value obj;
 	reader.parse(ifs, obj);

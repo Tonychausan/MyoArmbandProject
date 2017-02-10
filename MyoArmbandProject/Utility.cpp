@@ -243,18 +243,26 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_a
 	return data_vec;
 }
 void compressAllFiles(){
-	for (int i = 0; i < training_file_list.size; i++){
-		compressFile(training_file_list.files[i], true);
+	Filelist raw_training_file_list;
+	Filelist raw_test_file_list;
+
+	// Generating filelists
+	generateFilelist(&raw_training_file_list, getDataSetPath(RAW, TRAINING));
+	generateFilelist(&raw_test_file_list, getDataSetPath(RAW, TEST));
+
+	for (int i = 0; i < raw_training_file_list.size; i++){
+		compressFile(raw_training_file_list.files[i], true);
 	}
 
-	for (int i = 0; i < test_file_list.size; i++){
-		compressFile(test_file_list.files[i], false);
+	for (int i = 0; i < raw_test_file_list.size; i++){
+		compressFile(raw_test_file_list.files[i], false);
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
 }
 
 void compressFile(File fileToCompress, bool isTrainingSet){
+
 	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
 
 	std::string input_filename  = DATA_SET_FOLDER;
@@ -383,8 +391,8 @@ double compareArrays(double** in, double** test, Sensor sensor){
 	return r / number_of_arrays;
 }
 
-Gesture gestureComparisonsJsonFile(std::string test_filename){
-	FileDataHandler gestureInput(test_filename, false);
+Gesture gestureComparisonsJsonFile(File test_file){
+	FileDataHandler gestureInput(test_file, false);
 	return gestureComparisons(gestureInput);
 }
 
@@ -437,12 +445,12 @@ Gesture gestureComparisons(DataHandler gesture_input){
 
 	for (int i = 0; i < training_file_list.size; i++)
 	{
-		std::string training_data_filename = training_file_list.files[i].filename;
-		std::cout << training_data_filename;
+		File training_data_file = training_file_list.files[i];
+		std::cout << training_data_file.filename;
 
-		Gesture check_gesture = training_file_list.files[i].answer;
+		Gesture check_gesture = training_file_list.files[i].gesture;
 
-		FileDataHandler gesture_training_data(training_data_filename, true);
+		FileDataHandler gesture_training_data(training_data_file, true);
 		for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 		{
 			Sensor sensor = static_cast<Sensor>(k);

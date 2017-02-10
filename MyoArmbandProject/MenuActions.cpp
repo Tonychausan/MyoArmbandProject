@@ -13,14 +13,14 @@ bool isRecording = false;
 void testFile(File file){
 	std::cout << "##############################" << std::endl << "Test file: " << file.filename << std::endl;
 
-	Gesture prediction = gestureComparisonsJsonFile(file.filename);
-	std::cout << std::endl << "Gesture: " << gestureToString(file.answer) << std::endl;
+	Gesture prediction = gestureComparisonsJsonFile(file);
+	std::cout << std::endl << "Gesture: " << gestureToString(file.gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(prediction) << std::endl << std::endl;
 
-	number_of_tests[file.answer] += 1;
-	if (prediction == file.answer)
+	number_of_tests[file.gesture] += 1;
+	if (prediction == file.gesture)
 	{
-		number_of_correct_recognition[file.answer] += 1;
+		number_of_correct_recognition[file.gesture] += 1;
 	}
 }
 

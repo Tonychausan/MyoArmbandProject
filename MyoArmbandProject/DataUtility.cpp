@@ -79,7 +79,7 @@ void generateFilelist(Filelist *filelist, std::string path_string){
 			
 
 			filelist->files[i].filename = (std::string)ent->d_name;
-			filelist->files[i].answer = getGestureFromFilename((std::string)ent->d_name);
+			filelist->files[i].gesture = getGestureFromFilename((std::string)ent->d_name);
 
 			i++;
 		}

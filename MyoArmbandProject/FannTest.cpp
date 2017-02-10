@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <iomanip>
 
 #include "floatfann.h"
 #include "fann.h"
@@ -86,12 +87,18 @@ void buildTrainingFile(){
 
 	for (int training_instance_i = 0; training_instance_i < number_of_training_instances; training_instance_i++)
 	{
-		std::string training_data_filename = training_file_list.files[training_instance_i].filename;
-		std::cout << training_data_filename << std::endl;
 
-		FileDataHandler gesture_training_data(training_data_filename, true);
+		File training_data_file = training_file_list.files[training_instance_i];
+		std::cout << training_data_file.filename << std::endl;
 
-		int solution = (int)training_file_list.files[training_instance_i].answer;
+		FileDataHandler gesture_training_data(training_data_file, true);
+
+		int solution = training_data_file.gesture;
+
+		double emg_max = -1;
+		double emg_min = -1;
+
+		double emg_values[NUMBER_OF_EMG_ARRAYS];
 
 		for (int i = 0; i < number_of_inputs; i++)
 		{
@@ -100,8 +107,17 @@ void buildTrainingFile(){
 			{
 				emg_sum += pow(gesture_training_data.getSensorData(EMG)[i][k], 2);
 			}
-			training_data << emg_sum;
+			emg_values[i] = emg_sum;
+			if (emg_sum > emg_max)
+				emg_max = emg_sum;
 
+			if (emg_sum < emg_min || emg_min == -1)
+				emg_min = emg_sum;
+		}
+		
+		for (int i = 0; i < number_of_inputs; i++)
+		{
+			training_data << std::setprecision(9) << (emg_values[i] - emg_min) / (emg_max - emg_min);
 			if (i != number_of_inputs - 1)
 				training_data << " ";
 		}
@@ -140,14 +156,14 @@ void emgTrainNN(){
 	const unsigned int num_output = NUMBER_OF_GESTURES;
 	const unsigned int num_layers = 3;
 	const unsigned int num_neurons_hidden = NUMBER_OF_EMG_ARRAYS;
-	const float desired_error = (const float) 0.0001;
+	const float desired_error = (const float) 0.000001;
 	const unsigned int max_epochs = 500000;
 	const unsigned int epochs_between_reports = 1000;
 
-	//struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden, num_output);
+	struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden, num_output);
 
-	float 	connection_rate = 0.5;
-	struct fann *ann = fann_create_sparse(connection_rate, num_layers, num_input, num_neurons_hidden, num_output);
+	//float 	connection_rate = 0.5;
+	//struct fann *ann = fann_create_sparse(connection_rate, num_layers, num_input, num_neurons_hidden, num_output);
 
 	fann_set_activation_function_hidden(ann, FANN_SIGMOID);
 	fann_set_activation_function_output(ann, FANN_SIGMOID);
@@ -161,20 +177,25 @@ void emgTrainNN(){
 
 void emgTestNN(File file){
 	int number_of_inputs = NUMBER_OF_EMG_ARRAYS;
-	
-	std::string test_data_filename = file.filename;
-	Gesture gesture = file.answer;
 
-	FileDataHandler gesture_training_data(test_data_filename, true);
+	File test_data_file = file;
+	Gesture gesture = file.gesture;
+
+	FileDataHandler gesture_training_data(test_data_file, false);
 
 
 	std::cout << "###############################" << std::endl;
-	std::cout << "Input file: " << test_data_filename << "\n\n";
+	std::cout << "Input file: " << test_data_file.filename << "\n\n";
 
 	fann_type *calc_out;
 	fann_type input[NUMBER_OF_EMG_ARRAYS];
 
 	struct fann *ann = fann_create_from_file("NNdata/emg_float.net");
+	
+	double emg_max = -1;
+	double emg_min = -1;
+
+	double emg_sums[NUMBER_OF_EMG_ARRAYS];
 
 	for (int i = 0; i < number_of_inputs; i++)
 	{
@@ -183,7 +204,18 @@ void emgTestNN(File file){
 		{
 			emg_sum += pow(gesture_training_data.getSensorData(EMG)[i][k], 2);
 		}
-		input[i] = emg_sum;
+		//input[i] = emg_sum;
+		emg_sums[i] = emg_sum;
+		if (emg_sum > emg_max)
+			emg_max = emg_sum;
+
+		if (emg_sum < emg_min || emg_min == -1)
+			emg_min = emg_sum;
+	}
+
+	for (int i = 0; i < number_of_inputs; i++)
+	{
+		input[i] = (emg_sums[i] - emg_min) / (emg_max - emg_min);
 	}
 	calc_out = fann_run(ann, input);
 
@@ -200,7 +232,7 @@ void emgTestNN(File file){
 	}
 	std::cout << "\nGesture: " << gestureToString(gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(guess_gesture) << std::endl;
-	
+
 
 	std::cout << std::endl;
 

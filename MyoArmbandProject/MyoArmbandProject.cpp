@@ -89,7 +89,6 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 	if (!print)
 		return;
 
-
 	action = 0;
 	printMenu();
 	std::cin >> action;
@@ -112,9 +111,9 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 			else if (hello == 2)
 				emgTrainNN();
 			else if (hello == 3){
-				for (int i = 0; i < training_file_list.size; i++)
+				for (int i = 0; i < test_file_list.size; i++)
 				{
-					emgTestNN(training_file_list.files[i]);
+					emgTestNN(test_file_list.files[i]);
 				}
 			}
 			else{
