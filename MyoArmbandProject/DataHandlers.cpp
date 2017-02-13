@@ -15,13 +15,13 @@ DataHandler::DataHandler(){
 };
 
 
-FileDataHandler::FileDataHandler(File input_file, bool isTrainingSet)
+FileDataHandler::FileDataHandler(File input_file, DataSetType datasetType)
 	:DataHandler()
 {
 	file = new File();
 	file->gesture = input_file.gesture;
 	
-	std::string filetype_folder = isTrainingSet ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
+	std::string filetype_folder = datasetType == TRAINING ? TRAINING_SET_FOLDER : TEST_SET_FOLDER;
 
 	std::string filename = DATA_SET_FOLDER;
 	filename.append(COMPRESSED_DATA_FOLDER);

@@ -15,6 +15,8 @@ void runPreSampledDataTests();
 
 void compressFiles();
 
+void neuralNetworkTest();
+
 void liveDataPrint(DataCollector &collector, myo::Hub &hub);
 
 void liveGestureRecognition(DataCollector &collector, myo::Hub &hub);

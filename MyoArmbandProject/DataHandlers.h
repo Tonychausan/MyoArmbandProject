@@ -41,7 +41,7 @@ class FileDataHandler : public DataHandler{
 private:
 	File *file;
 public:
-	FileDataHandler(File input_file, bool isTrainingSet);
+	FileDataHandler(File input_file, DataSetType);
 
 	/*
 	* Function: generateSensorData

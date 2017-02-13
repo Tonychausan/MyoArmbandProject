@@ -6,6 +6,7 @@
 #include "DataCollector.h"
 #include "Utility.h"
 #include "Constants.h"
+#include "FannTest.h"
 
 bool dummy = false;
 bool isRecording = false;
@@ -48,6 +49,26 @@ void compressFiles(){
 	compressAllFiles();
 	std::cin.ignore();
 	clearScreen();
+}
+
+void neuralNetworkTest(){
+	int hello;
+	std::cout << "(1)Build Training file\n(2)Train from file\n(3)Test\n(4)Remove\n";
+	std::cin >> hello;
+
+	if (hello == 1)
+		buildEmgNeuralNetworkTrainingFile();
+	else if (hello == 2)
+		emgTrainNN();
+	else if (hello == 3){
+		for (int i = 0; i < test_file_list.size; i++)
+		{
+			emgTestNN(test_file_list.files[i]);
+		}
+	}
+	else{
+		emgNNfileRemover();
+	}
 }
 
 void liveDataPrint(DataCollector &collector, myo::Hub &hub){

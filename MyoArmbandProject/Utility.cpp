@@ -392,7 +392,7 @@ double compareArrays(double** in, double** test, Sensor sensor){
 }
 
 Gesture gestureComparisonsJsonFile(File test_file){
-	FileDataHandler gestureInput(test_file, false);
+	FileDataHandler gestureInput(test_file, TEST);
 	return gestureComparisons(gestureInput);
 }
 
@@ -450,7 +450,7 @@ Gesture gestureComparisons(DataHandler gesture_input){
 
 		Gesture check_gesture = training_file_list.files[i].gesture;
 
-		FileDataHandler gesture_training_data(training_data_file, true);
+		FileDataHandler gesture_training_data(training_data_file, TRAINING);
 		for (int k = 0; k < NUMBER_OF_SENSORS; k++)
 		{
 			Sensor sensor = static_cast<Sensor>(k);

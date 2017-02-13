@@ -102,23 +102,7 @@ void menu(int& action, bool print, myo::Hub *hub = NULL){
 	else if (action == 5){
 		// do some neural network shit
 		while (true){
-			int hello;
-			std::cout << "(1)Build Training file\n(2)Train from file\n(3)Test\n(4)Remove\n";
-			std::cin >> hello;
-
-			if (hello == 1)
-				buildTrainingFile();
-			else if (hello == 2)
-				emgTrainNN();
-			else if (hello == 3){
-				for (int i = 0; i < test_file_list.size; i++)
-				{
-					emgTestNN(test_file_list.files[i]);
-				}
-			}
-			else{
-				emgNNfileRemover();
-			}
+			neuralNetworkTest();
 		}
 	}
 	else if (hub != NULL){ //Myo dependent activity
