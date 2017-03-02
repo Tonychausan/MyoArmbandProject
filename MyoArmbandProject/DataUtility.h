@@ -9,7 +9,7 @@ static std::string sensor_names[] = { "Emg", "Acc", "Ori", "Gyr" };
 
 // List of gestures
 enum Gesture{ EAT, HELP, SLEEP, THANKYOU, WHY, NONE_GESTURE };
-static std::string gesture_names[] = { "EAT", "HELP", "SLEEP", "THANKYOU", "WHY" };
+static std::string gesture_names[] = { "EAT", "HELP", "SLEEP", "THANKYOU", "WHY", "NONE_GESTURE" };
 static const int NUMBER_OF_GESTURES = 5;
 
 enum DataSetType{ TRAINING, TEST };

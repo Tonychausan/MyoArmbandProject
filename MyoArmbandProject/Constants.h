@@ -2,7 +2,6 @@
 #define ConstantH
 
 #include <string>
-#include "SettingsVariables.h"
 
 
 static const int NUMBER_OF_SENSORS = 4;
@@ -14,6 +13,7 @@ static const int FREQUENCY_ACC = 50;
 static const int FREQUENCY_GYR = 50;
 
 
+static const int DATA_TIME_INTERVAL_GESTURE = 3; //Gesture interval for recording in seconds
 
 // Data length for each sensor for each record based on time interval and frequence
 static const int DATA_LENGTH_EMG = FREQUENCY_EMG * DATA_TIME_INTERVAL_GESTURE;
@@ -26,6 +26,15 @@ static const int NUMBER_OF_EMG_ARRAYS = 8;
 static const int NUMBER_OF_ACC_ARRAYS = 3;
 static const int NUMBER_OF_GYR_ARRAYS = 3;
 static const int NUMBER_OF_ORI_ARRAYS = 4;
+
+
+// emg Neural Network Variables
+static const int EMG_NN_NUMBER_OF_INPUT = NUMBER_OF_EMG_ARRAYS;
+static const int EMG_NN_NUMBER_OF_OUTPUT = NUMBER_OF_GESTURES;
+static const int EMG_NN_NUMBER_OF_LAYERS = 3;
+static const int EMG_NN_NUMBER_OF_NEURONS_HIDDEN[] = { NUMBER_OF_EMG_ARRAYS };
+static const std::string EMG_NN_TRAINING_FILENAME = "NNdata/emg.data";
+static const std::string EMG_NN_FILENAME = "NNdata/emg_float.net";
 
 
 static const std::string RECORD_PRESTART_MESSEGE = "Press <Enter> to start recording...";

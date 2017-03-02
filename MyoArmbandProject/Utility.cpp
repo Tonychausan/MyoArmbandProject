@@ -60,8 +60,8 @@ void clearScreen()
 }
 
 double crossCorrelation(int maxdelay, double* x, double* y, int size_of_array){
-	double xFirst = x[0];
-	double yFirst = y[0];
+	double xFirst = 0;//x[0];
+	double yFirst = 0;// y[0];
 
 	int i, j;
 	double mx, my, sx, sy, sxy, denom, r;
@@ -242,6 +242,19 @@ Json::Value jsonDataArray(std::string dataname, Json::Value obj, int number_of_a
 	}
 	return data_vec;
 }
+
+bool isFileAlreadyCompressed(File file, DataSetType datatype){
+	std::string path_filename = getDataSetPath(COMPRESSED, datatype);
+	path_filename.append(file.filename);
+
+	if (std::ifstream(path_filename)){
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 void compressAllFiles(){
 	Filelist raw_training_file_list;
 	Filelist raw_test_file_list;
@@ -251,11 +264,17 @@ void compressAllFiles(){
 	generateFilelist(&raw_test_file_list, getDataSetPath(RAW, TEST));
 
 	for (int i = 0; i < raw_training_file_list.size; i++){
-		compressFile(raw_training_file_list.files[i], true);
+		if (!isFileAlreadyCompressed(raw_training_file_list.files[i], TRAINING))
+		{
+			compressFile(raw_training_file_list.files[i], true);
+		}
 	}
 
 	for (int i = 0; i < raw_test_file_list.size; i++){
-		compressFile(raw_test_file_list.files[i], false);
+		if (!isFileAlreadyCompressed(raw_test_file_list.files[i], TEST))
+		{
+			compressFile(raw_test_file_list.files[i], false);
+		}
 	}
 
 	std::cout << "Comppression finished!" << std::endl;
@@ -377,15 +396,17 @@ double compareArrays(double** in, double** test, Sensor sensor){
 	double r = 0;
 	for (int i = 0; i < number_of_arrays; i++)
 	{
-		if (sensor == EMG){
+		if (/*sensor == EMG*/false){
 			r += emgFourierTransformedCompare(in[i], test[i], data_length);
 		}
 		else{
-			if (!isDtwUsed)
+			if (!isDtwUsed){
 				r += crossCorrelation(data_length / 2, in[i], test[i], data_length);
+			}
 			else{
 				r += calculateDynamicTimeWarpedDistance(in[i], test[i], data_length);
 			}
+			
 		}
 	}
 	return r / number_of_arrays;

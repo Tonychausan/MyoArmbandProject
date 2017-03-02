@@ -239,15 +239,11 @@ void DataCollector::gestureRecordOff(){
 
 	begin_time = clock();
 	Gesture prediction = gestureComparisons(input_gesture);
-	
 
 	std::cout << "Recognize: " << gestureToString(prediction) << std::endl;
-
 	std::cout << "Analyse time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
 
 	std::cout << std::endl << RECORD_PRESTART_MESSEGE << std::endl;
-
-	
 
 	isRecording  = false;
 }

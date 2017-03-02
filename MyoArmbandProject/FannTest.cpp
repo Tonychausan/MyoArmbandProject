@@ -21,21 +21,41 @@ void emgNNfileRemover(){
 	remove("NNdata/emg_float.net");
 }
 
-void generateEmgSumArray(){
+template <class Array>
+void generateEmgSumArray(Array *emg_values, int array_size, FileDataHandler gesture_training_data){
+	double emg_max = -1;
+	double emg_min = -1;
 
+	for (int i = 0; i < array_size; i++)
+	{
+		double emg_sum = 0.0;
+		for (int k = 0; k < DATA_LENGTH_EMG; k++)
+		{
+			emg_sum += pow(gesture_training_data.getSensorData(EMG)[i][k], 2);
+		}
+		emg_values[i] = emg_sum;
+		if (emg_sum > emg_max)
+			emg_max = emg_sum;
+
+		if (emg_sum < emg_min || emg_min == -1)
+			emg_min = emg_sum;
+	}
+
+	for (int i = 0; i < array_size; i++)
+	{
+		emg_values[i] = (emg_values[i] - emg_min) / (emg_max - emg_min);
+	}
 }
 
 void buildEmgNeuralNetworkTrainingFile(){
 	std::ofstream training_data;
-	training_data.open("NNdata/emg.data");
+	training_data.open(EMG_NN_TRAINING_FILENAME);
 
 	int number_of_training_instances = training_file_list.size;
-	int number_of_inputs = NUMBER_OF_EMG_ARRAYS;
-	int number_of_outputs = NUMBER_OF_GESTURES;
 	
 	training_data << number_of_training_instances << " ";
-	training_data << number_of_inputs << " "; 
-	training_data << number_of_outputs << std::endl;
+	training_data << EMG_NN_NUMBER_OF_INPUT << " ";
+	training_data << EMG_NN_NUMBER_OF_OUTPUT << std::endl;
 
 	for (int training_instance_i = 0; training_instance_i < number_of_training_instances; training_instance_i++)
 	{
@@ -43,39 +63,22 @@ void buildEmgNeuralNetworkTrainingFile(){
 		File training_data_file = training_file_list.files[training_instance_i];
 		std::cout << training_data_file.filename << std::endl;
 
-		FileDataHandler gesture_training_data(training_data_file, TEST);
+		FileDataHandler gesture_training_data(training_data_file, TRAINING);
 
 		int solution = training_data_file.gesture;
 
-		double emg_max = -1;
-		double emg_min = -1;
+		double *emg_values = new double[EMG_NN_NUMBER_OF_INPUT];
+		generateEmgSumArray(emg_values, EMG_NN_NUMBER_OF_INPUT, gesture_training_data);
 
-		double emg_values[NUMBER_OF_EMG_ARRAYS];
-
-		for (int i = 0; i < number_of_inputs; i++)
+		for (int i = 0; i < EMG_NN_NUMBER_OF_INPUT; i++)
 		{
-			double emg_sum = 0.0;
-			for (int k = 0; k < DATA_LENGTH_EMG; k++)
-			{
-				emg_sum += pow(gesture_training_data.getSensorData(EMG)[i][k], 2);
-			}
-			emg_values[i] = emg_sum;
-			if (emg_sum > emg_max)
-				emg_max = emg_sum;
-
-			if (emg_sum < emg_min || emg_min == -1)
-				emg_min = emg_sum;
-		}
-		
-		for (int i = 0; i < number_of_inputs; i++)
-		{
-			training_data << std::setprecision(9) << (emg_values[i] - emg_min) / (emg_max - emg_min);
-			if (i != number_of_inputs - 1)
+			training_data << std::setprecision(9) << emg_values[i];
+			if (i != EMG_NN_NUMBER_OF_INPUT - 1)
 				training_data << " ";
 		}
 		training_data << std::endl;
 
-		for (int o = 0; o < number_of_outputs; o++)
+		for (int o = 0; o < EMG_NN_NUMBER_OF_OUTPUT; o++)
 		{
 			if (solution == o) {
 				training_data << 1;
@@ -87,7 +90,7 @@ void buildEmgNeuralNetworkTrainingFile(){
 			}
 			std::cout << " ";
 
-			if (o != number_of_inputs - 1) {
+			if (o != EMG_NN_NUMBER_OF_INPUT - 1) {
 				training_data << " ";
 			}
 		}
@@ -104,32 +107,26 @@ void buildEmgNeuralNetworkTrainingFile(){
 }
 
 void emgTrainNN(){
-	const unsigned int num_input = NUMBER_OF_EMG_ARRAYS;
-	const unsigned int num_output = NUMBER_OF_GESTURES;
-	const unsigned int num_layers = 3;
-	const unsigned int num_neurons_hidden = NUMBER_OF_EMG_ARRAYS;
 	const float desired_error = (const float) 0.000001;
 	const unsigned int max_epochs = 500000;
 	const unsigned int epochs_between_reports = 1000;
 
-	struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden, num_output);
+	struct fann *ann = fann_create_standard(EMG_NN_NUMBER_OF_LAYERS, EMG_NN_NUMBER_OF_INPUT, EMG_NN_NUMBER_OF_NEURONS_HIDDEN[0], EMG_NN_NUMBER_OF_OUTPUT);
 
-	//float 	connection_rate = 0.5;
-	//struct fann *ann = fann_create_sparse(connection_rate, num_layers, num_input, num_neurons_hidden, num_output);
+	//float 	connection_rate = EMG_NN_NUMBER_OF_INPUT/3;
+	//struct fann *ann = fann_create_sparse(connection_rate, EMG_NN_NUMBER_OF_LAYERS, EMG_NN_NUMBER_OF_INPUT, EMG_NN_NUMBER_OF_NEURONS_HIDDEN[0], EMG_NN_NUMBER_OF_OUTPUT);
 
 	fann_set_activation_function_hidden(ann, FANN_SIGMOID);
 	fann_set_activation_function_output(ann, FANN_SIGMOID);
 
-	fann_train_on_file(ann, "NNdata/emg.data", max_epochs, epochs_between_reports, desired_error);
+	fann_train_on_file(ann, EMG_NN_TRAINING_FILENAME.c_str(), max_epochs, epochs_between_reports, desired_error);
 
-	fann_save(ann, "NNdata/emg_float.net");
+	fann_save(ann, EMG_NN_FILENAME.c_str());
 
 	fann_destroy(ann);
 }
 
 void emgTestNN(File file){
-	int number_of_inputs = NUMBER_OF_EMG_ARRAYS;
-
 	File test_data_file = file;
 	Gesture gesture = file.gesture;
 
@@ -139,35 +136,12 @@ void emgTestNN(File file){
 	std::cout << "Input file: " << test_data_file.filename << "\n\n";
 
 	fann_type *calc_out;
-	fann_type input[NUMBER_OF_EMG_ARRAYS];
+	fann_type *input = new fann_type[EMG_NN_NUMBER_OF_INPUT];
 
-	struct fann *ann = fann_create_from_file("NNdata/emg_float.net");
+	struct fann *ann = fann_create_from_file(EMG_NN_FILENAME.c_str());
 	
-	double emg_max = -1;
-	double emg_min = -1;
+	generateEmgSumArray(input, EMG_NN_NUMBER_OF_INPUT, gesture_training_data);
 
-	double emg_sums[NUMBER_OF_EMG_ARRAYS];
-
-	for (int i = 0; i < number_of_inputs; i++)
-	{
-		double emg_sum = 0.0;
-		for (int k = 0; k < DATA_LENGTH_EMG; k++)
-		{
-			emg_sum += pow(gesture_training_data.getSensorData(EMG)[i][k], 2);
-		}
-		//input[i] = emg_sum;
-		emg_sums[i] = emg_sum;
-		if (emg_sum > emg_max)
-			emg_max = emg_sum;
-
-		if (emg_sum < emg_min || emg_min == -1)
-			emg_min = emg_sum;
-	}
-
-	for (int i = 0; i < number_of_inputs; i++)
-	{
-		input[i] = (emg_sums[i] - emg_min) / (emg_max - emg_min);
-	}
 	calc_out = fann_run(ann, input);
 
 	double max_calc_out = (double)calc_out[0];
@@ -183,7 +157,6 @@ void emgTestNN(File file){
 	}
 	std::cout << "\nGesture: " << gestureToString(gesture) << std::endl;
 	std::cout << "Prediction: " << gestureToString(guess_gesture) << std::endl;
-
 
 	std::cout << std::endl;
 
